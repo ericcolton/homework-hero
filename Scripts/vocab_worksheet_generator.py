@@ -265,8 +265,25 @@ def draw_questions(c, wrapped_questions, start_idx, end_idx, y_start, start_num=
         y -= BASE_GAP_BETWEEN_PROBLEMS
     return y, qnum
 
-def build_pdf(entries, output_path, title, subtitle):
+def build_section(c, section_title, seed, section):
+# def build_section(c, section_data, title, subtitle):
+    
+    subtitle = section["subtitle"]
+    entries = section["entries"]
     # Prepare sanitized content
+    
+    # if not isinstance(entries, list) or not entries:
+    #     print("Error: JSON must be a non-empty list of entries.", file=sys.stderr)
+    #     sys.exit(1)
+
+    # # Basic schema check
+    # required = {"word", "definition", "part_of_speech", "sentence"}
+    # for i, e in enumerate(entries):
+    #     if not isinstance(e, dict) or not required.issubset(e.keys()):
+    #         print(f"Error: entry {i} missing required keys {required}.", file=sys.stderr)
+    #         sys.exit(1)
+    
+    
     questions = []
     for e in entries:
         word = normalize_ascii(e["word"])
@@ -284,10 +301,8 @@ def build_pdf(entries, output_path, title, subtitle):
     # Wrap all questions
     wrapped = [wrap_text(q["sentence"], TEXT_FONT, TEXT_SIZE, CONTENT_W) for q in questions]
 
-    c = canvas.Canvas(output_path, pagesize=letter)
-
     # ---------------- Page 1 ----------------
-    y = draw_header_page(c, title, subtitle, 1, 2)
+    y = draw_header_page(c, section_title, subtitle, 1, 2)
     y = draw_word_bank(c, word_counts, y)
     available_h = y - M_BOTTOM
 
@@ -337,6 +352,29 @@ def build_pdf(entries, output_path, title, subtitle):
         # y3 -= (TEXT_SIZE + 4)
 
     c.save()
+    
+def build_section_title(title, section_i, inc_page_of):
+    # TODO: build section title, interpolate section_i
+    return title
+    
+def build_pdf(doc_root, output_path):
+    c = canvas.Canvas(output_path, pagesize=letter)
+    
+    title = doc_root["title"]
+    seed = doc_root["seed"]
+    inc_page_of = "inc_page_of" in doc_root and doc_root["inc_page_of"]
+    sections = doc_root["sections"]
+    
+    for i, s in enumerate(sections):
+        section_title = build_section_title(title, i + 1, inc_page_of)
+        build_section(c, section_title, seed, s)
+
+    # # Basic schema check
+    # required = {"word", "definition", "part_of_speech", "sentence"}
+    # for i, e in enumerate(entries):
+    #     if not isinstance(e, dict) or not required.issubset(e.keys()):
+    #         print(f"Error: entry {i} missing required keys {required}.", file=sys.stderr)
+    #         sys.exit(1)
 
 # -----------------------------
 # CLI
@@ -345,10 +383,6 @@ def main():
     parser = argparse.ArgumentParser(description="Generate a PDF vocabulary worksheet from JSON.")
     parser.add_argument("json_path", help="Path to input JSON file.")
     parser.add_argument("--output", "-o", help="Path to output PDF. Default: <json_basename>.pdf")
-    parser.add_argument("--title", default="Avery's WordlyWise - Section 6",
-                        help="Header title (default matches latest Section 6 layout).")
-    parser.add_argument("--subtitle", default="Gusts over a chasm, we rig the schedule.",
-                        help="Optional subtitle shown below the title.")
     args = parser.parse_args()
 
     if not os.path.exists(args.json_path):
@@ -357,28 +391,25 @@ def main():
 
     with open(args.json_path, "r", encoding="utf-8") as f:
         try:
-            entries = json.load(f)
+            doc_root = json.load(f)
         except json.JSONDecodeError as e:
             print(f"Error: invalid JSON: {e}", file=sys.stderr)
             sys.exit(1)
 
-    if not isinstance(entries, list) or not entries:
-        print("Error: JSON must be a non-empty list of entries.", file=sys.stderr)
+    if not isinstance(doc_root, dict) or not doc_root:
+        print("Error: JSON must be a non-empty dictionary.", file=sys.stderr)
         sys.exit(1)
 
     # Basic schema check
-    required = {"word", "definition", "part_of_speech", "sentence"}
-    for i, e in enumerate(entries):
-        if not isinstance(e, dict) or not required.issubset(e.keys()):
-            print(f"Error: entry {i} missing required keys {required}.", file=sys.stderr)
-            sys.exit(1)
-
+    # required = {"title", "seed", "sections"}
+    # TODO: add root schema checking
+    
     out_path = args.output
     if not out_path:
         base = os.path.splitext(os.path.basename(args.json_path))[0]
         out_path = os.path.join(os.path.dirname(args.json_path), f"{base}.pdf")
 
-    build_pdf(entries, out_path, args.title, args.subtitle)
+    build_pdf(doc_root, out_path)
     print(f"Created: {out_path}")
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
   "title": "Avery's Wordly Wise - Section {section}",
   "theme_name": "KPop Demon Hunters",
   "inc_page_of": true,
-  "random_seed": 1,
+  "seed": 1,
   "sections": [
     {
       "section": 1,
