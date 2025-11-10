@@ -319,7 +319,7 @@ def build_section(c, section_title, seed, section):
     c.showPage()
 
     # ---------------- Page 2 (questions continued) ----------------
-    y2 = draw_header_page(c, title, subtitle, 2, 2)
+    y2 = draw_header_page(c, section_title, subtitle, 2, 2)
     y2 -= EXTRA_SPACE_BEFORE_FIRST_Q
     available_h2 = y2 - M_BOTTOM
 
@@ -329,7 +329,7 @@ def build_section(c, section_title, seed, section):
     # ---------------- Page 3 (ANSWER KEY) ----------------
     y3 = PAGE_H - M_TOP
     c.setFont(TITLE_FONT, TITLE_SIZE)
-    ak_title = f"{title} (Answer Key)"
+    ak_title = f"{section_title} (Answer Key)"
     c.drawString((PAGE_W - stringWidth(ak_title, TITLE_FONT, TITLE_SIZE)) / 2, y3, ak_title)
     y3 -= (TITLE_SIZE + 6)
 
@@ -350,12 +350,14 @@ def build_section(c, section_title, seed, section):
         # If you want definitions on the answer key, uncomment:
         # c.drawString(M_LEFT + 18, y3, f"— {q['definition']} ({q['pos']})")
         # y3 -= (TEXT_SIZE + 4)
+        
+    c.showPage()
 
-    c.save()
     
 def build_section_title(title, section_i, inc_page_of):
     # TODO: build section title, interpolate section_i
-    return title
+    section_i_str = str(section_i)
+    return title.replace("{section}", section_i_str)
     
 def build_pdf(doc_root, output_path):
     c = canvas.Canvas(output_path, pagesize=letter)
@@ -369,6 +371,8 @@ def build_pdf(doc_root, output_path):
         section_title = build_section_title(title, i + 1, inc_page_of)
         build_section(c, section_title, seed, s)
 
+    c.save()
+    
     # # Basic schema check
     # required = {"word", "definition", "part_of_speech", "sentence"}
     # for i, e in enumerate(entries):
