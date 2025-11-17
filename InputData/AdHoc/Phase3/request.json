@@ -1,0 +1,13 @@
+{
+  reading_level: {"system": "fp", "level": "P"},
+  words: [
+    {
+      "word": "fatal",
+      "part_of_speech": "adjective",
+      "definition": "Causing death.",
+      "def_num": 1,
+      "_key": "wordly_wise_3000|fatal|Causing death.|1|gpt5.1-nano",
+      "key": "1d7621dace87f356",
+    }
+  ]
+}
