@@ -2,6 +2,7 @@
 import argparse
 import json
 import os
+from pydantic import BaseModel
 import sys
 from typing import Any, Dict, Optional
 
@@ -33,6 +34,14 @@ def parse_args() -> argparse.Namespace:
             "the user input."
         ),
     )
+    # parser.add_argument(
+    #     "-s",
+    #     "--schema-path",
+    #     required=True,
+    #     help=(
+    #         "Path to the json_schema file for API output. "
+    #     ),
+    # )
     return parser.parse_args()
 
 
@@ -42,6 +51,13 @@ def read_stdin_json() -> Dict[str, Any]:
         return json.loads(raw)
     except json.JSONDecodeError as exc:
         raise SystemExit(f"Failed to parse JSON from stdin: {exc}") from exc
+    
+# def read_schema_json(path: str) -> Dict[str, Any]:
+#     raw = read_file_text(path)
+#     try:
+#         return json.loads(raw)
+#     except json.JSONDecodeError as exc:
+#         raise SystemExit(f"Failed to parse JSON from schema file '{path}': {exc}") from exc
 
 
 def read_file_text(path: str) -> str:
@@ -50,7 +66,6 @@ def read_file_text(path: str) -> str:
             return f.read()
     except OSError as exc:
         raise SystemExit(f"Failed to read file '{path}': {exc}") from exc
-
 
 def load_theme_content(request: Dict[str, Any], theme_dir: Optional[str]) -> Optional[str]:
     """
@@ -89,16 +104,24 @@ def build_model_input(request: Dict[str, Any], theme_content: Optional[str]) -> 
 
     return "".join(parts)
 
+class VocabSentence(BaseModel):
+    checksum: str
+    sentence: str
+
+class JsonOutputFormat(BaseModel):
+    subtitle: str
+    doc_checksum: str
+    data: list[VocabSentence]
 
 def call_openai(
     request: Dict[str, Any],
     system_prompt: str,
     user_input: str,
+#    json_schema: str,
 ) -> Any:
     """
     Call the OpenAI Responses API using:
       - model from request['model']
-      - seed from request['seed'] (if present)
       - system_prompt as `instructions`
       - user_input as `input`
     """
@@ -115,11 +138,13 @@ def call_openai(
         "model": model,
         "instructions": system_prompt,
         "input": user_input,
-    }
+        "store": True,
+        "text_format": JsonOutputFormat,
+        }
     # if isinstance(seed, int):
     #     kwargs["seed"] = seed
 
-    response = client.responses.create(**kwargs)
+    response = client.responses.parse(**kwargs)
 
     # Get the aggregated text form of the model output (convenience property). :contentReference[oaicite:4]{index=4}
     response_text = getattr(response, "output_text", None)
@@ -148,18 +173,22 @@ def main() -> None:
 
     # 3. Optionally load theme content.
     theme_content = load_theme_content(request_json, args.theme_dir)
+    
+#    # 4. Read json_schema content
+#    json_schema = read_schema_json(args.schema_path)
 
-    # 4. Build the user input string.
+    # 5. Build the user input string.
     model_input = build_model_input(request_json, theme_content)
-
-    # 5. Call OpenAI.
+    
+    # 6. Call OpenAI.
     response_payload = call_openai(
         request=request_json,
         system_prompt=system_prompt,
         user_input=model_input,
+#        json_schema=json_schema,
     )
 
-    # 6. Emit final wrapper JSON to stdout.
+    # 7. Emit final wrapper JSON to stdout.
     output_obj = {
         "request": request_json,
         "response": response_payload,

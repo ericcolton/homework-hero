@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ApiResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "const": "api_response"
+    },
+    "doc_checksum": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$"
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subtitle": {
+          "type": "string"
+        }
+      },
+      "required": ["subtitle"]
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "checksum": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{16}$"
+          },
+          "output": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sentence": {
+                "type": "string"
+              }
+            },
+            "required": ["sentence"]
+          }
+        },
+        "required": ["checksum", "output"]
+      }
+    }
+  },
+  "required": ["type", "doc_checksum", "output", "data"]
+}
+
