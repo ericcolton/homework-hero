@@ -101,7 +101,7 @@ def call_openai(
     request: Dict[str, Any],
     system_prompt: str,
     user_input: str,
-) -> Any:
+) -> JsonOutputFormat:
     """
     Call the OpenAI Responses API using:
       - model from request['model']
@@ -126,22 +126,79 @@ def call_openai(
         }
 
     response = client.responses.parse(**kwargs)
+    
+    output = response.output_parsed
+    
+    if output:
+        return output
 
-    # Get the aggregated text form of the model output (convenience property). :contentReference[oaicite:4]{index=4}
     response_text = getattr(response, "output_text", None)
+    print(f"raw_text: {response_text}", file=sys.stderr)
+    exit(1)
 
-    if response_text is None:
-        # Fallback: serialize the full response object if output_text isn't present.
-        # The OpenAI objects are Pydantic models, so we can use model_dump(). :contentReference[oaicite:5]{index=5}
-        return response.model_dump()
+    # # Get the aggregated text form of the model output (convenience property). :contentReference[oaicite:4]{index=4}
+    # response_text = getattr(response, "output_text", None)
 
-    # Try to interpret the model's output as JSON. If that fails, wrap raw text.
-    try:
-        parsed = json.loads(response_text)
-        return parsed
-    except json.JSONDecodeError:
-        return {"raw_text": response_text}
+    # if response_text is None:
+    #     # Fallback: serialize the full response object if output_text isn't present.
+    #     # The OpenAI objects are Pydantic models, so we can use model_dump(). :contentReference[oaicite:5]{index=5}
+    #     return response.model_dump()
 
+    # # Try to interpret the model's output as JSON. If that fails, wrap raw text.
+    # try:
+    #     parsed = json.loads(response_text)
+    #     return parsed
+    # except json.JSONDecodeError:
+    #     return {"raw_text": response_text}
+
+
+def append_response_json(request_json: Dict[str, Any], response_json: JsonOutputFormat):
+    req_doc_checksum = request_json.get("doc_checksum")
+    if not req_doc_checksum:
+        raise SystemExit("Input JSON missing 'doc_checksum'.")
+
+    if response_json.doc_checksum != req_doc_checksum:
+        raise SystemExit(
+            f"doc_checksum mismatch: input={req_doc_checksum} response={response_json.doc_checksum}"
+        )
+
+    response_by_checksum: Dict[str, VocabSentence] = {}
+    for item in response_json.data:
+        if item.checksum in response_by_checksum:
+            raise SystemExit(f"Duplicate checksum in response: {item.checksum}")
+        response_by_checksum[item.checksum] = item
+
+    input_entries = request_json.get("data") or []
+    missing_checksums = []
+
+    for entry in input_entries:
+        checksum = entry.get("checksum")
+        if not checksum:
+            raise SystemExit("Input entry missing 'checksum'.")
+
+        response_entry = response_by_checksum.get(checksum)
+        if response_entry is None:
+            missing_checksums.append(checksum)
+            continue
+
+        entry["output"] = {"sentence": response_entry.sentence}
+
+    extra_checksums = set(response_by_checksum.keys()) - {
+        entry.get("checksum") for entry in input_entries
+    }
+
+    if missing_checksums:
+        raise SystemExit(
+            f"Missing response for checksum(s): {', '.join(sorted(missing_checksums))}"
+        )
+
+    if extra_checksums:
+        raise SystemExit(
+            f"Response contains unexpected checksum(s): {', '.join(sorted(extra_checksums))}"
+        )
+
+    request_json["output"] = {"subtitle": response_json.subtitle}
+    return request_json
 
 def main() -> None:
     args = parse_args()
@@ -164,12 +221,15 @@ def main() -> None:
         system_prompt=system_prompt,
         user_input=model_input,
     )
+    
+    # 7. Append response JSON
+    output_obj = append_response_json(request_json, response_payload)
 
     # 6. Emit final wrapper JSON to stdout.
-    output_obj = {
-        "request": request_json,
-        "response": response_payload,
-    }
+    # output_obj = {
+    #     "request": request_json,
+    #     "response": response_payload,
+    # }
 
     json.dump(output_obj, sys.stdout, ensure_ascii=False, indent=2)
     sys.stdout.write("\n")
@@ -177,4 +237,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
