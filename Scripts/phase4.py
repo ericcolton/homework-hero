@@ -34,14 +34,6 @@ def parse_args() -> argparse.Namespace:
             "the user input."
         ),
     )
-    # parser.add_argument(
-    #     "-s",
-    #     "--schema-path",
-    #     required=True,
-    #     help=(
-    #         "Path to the json_schema file for API output. "
-    #     ),
-    # )
     return parser.parse_args()
 
 
@@ -52,14 +44,6 @@ def read_stdin_json() -> Dict[str, Any]:
     except json.JSONDecodeError as exc:
         raise SystemExit(f"Failed to parse JSON from stdin: {exc}") from exc
     
-# def read_schema_json(path: str) -> Dict[str, Any]:
-#     raw = read_file_text(path)
-#     try:
-#         return json.loads(raw)
-#     except json.JSONDecodeError as exc:
-#         raise SystemExit(f"Failed to parse JSON from schema file '{path}': {exc}") from exc
-
-
 def read_file_text(path: str) -> str:
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -99,7 +83,7 @@ def build_model_input(request: Dict[str, Any], theme_content: Optional[str]) -> 
     parts.append(json.dumps(request, ensure_ascii=False, indent=2))
 
     if theme_content is not None:
-        parts.append("\n\nTHEME JSON:\n")
+        parts.append("\n\nTHEME:\n")
         parts.append(theme_content)
 
     return "".join(parts)
@@ -117,7 +101,6 @@ def call_openai(
     request: Dict[str, Any],
     system_prompt: str,
     user_input: str,
-#    json_schema: str,
 ) -> Any:
     """
     Call the OpenAI Responses API using:
@@ -141,8 +124,6 @@ def call_openai(
         "store": True,
         "text_format": JsonOutputFormat,
         }
-    # if isinstance(seed, int):
-    #     kwargs["seed"] = seed
 
     response = client.responses.parse(**kwargs)
 
@@ -174,21 +155,17 @@ def main() -> None:
     # 3. Optionally load theme content.
     theme_content = load_theme_content(request_json, args.theme_dir)
     
-#    # 4. Read json_schema content
-#    json_schema = read_schema_json(args.schema_path)
-
-    # 5. Build the user input string.
+    # 4. Build the user input string.
     model_input = build_model_input(request_json, theme_content)
     
-    # 6. Call OpenAI.
+    # 5. Call OpenAI.
     response_payload = call_openai(
         request=request_json,
         system_prompt=system_prompt,
         user_input=model_input,
-#        json_schema=json_schema,
     )
 
-    # 7. Emit final wrapper JSON to stdout.
+    # 6. Emit final wrapper JSON to stdout.
     output_obj = {
         "request": request_json,
         "response": response_payload,
