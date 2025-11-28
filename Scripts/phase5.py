@@ -72,7 +72,7 @@ BLANK = "______"  # what we draw for the missing word in sentences
 
 INSTRUCTIONS = (
     "Fill in each blank with the correct word. Use each word as many times as shown in the Word Bank. "
-    "Don't forget to review your answers!"
+    "Don't forget to review your answers."
 )
 
 # -----------------------------
