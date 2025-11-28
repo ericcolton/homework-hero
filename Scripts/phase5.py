@@ -72,7 +72,7 @@ BLANK = "______"  # what we draw for the missing word in sentences
 
 INSTRUCTIONS = (
     "Fill in each blank with the correct word. Use each word as many times as shown in the Word Bank. "
-    "All sentences take place in the 'K-Pop Demon Hunters' world."
+    "Don't forget to review your answers!"
 )
 
 # -----------------------------
@@ -266,11 +266,28 @@ def draw_questions(c, wrapped_questions, start_idx, end_idx, y_start, start_num=
         y -= BASE_GAP_BETWEEN_PROBLEMS
     return y, qnum
 
-def build_section(c, section_title, seed, section):
-# def build_section(c, section_data, title, subtitle):
+def draw_footer(c, footer_format, presentation_metadata):
+    """Draw a footer at the bottom of the page based on footer_metadata."""
+    if not footer_format:
+        return
     
-    subtitle = section["output"]["subtitle"]
+    c.setFont(TEXT_FONT, TEXT_SIZE - 2)
+    footer_text = footer_format
+    for key, value in presentation_metadata.items():
+        placeholder = "{" + key + "}"
+        footer_text = footer_text.replace(placeholder, str(value))
+
+    c.drawString((PAGE_W - stringWidth(footer_text, TEXT_FONT, TEXT_SIZE - 2)) / 2, M_BOTTOM / 2, footer_text)
+
+def build_section(c, section_title, seed, section, footer_format, presentation_variables):
+    
+    output_subtitle = section["output"]["subtitle"]
     entries = section["data"]
+    
+    # Create episode string with comma-formatted seed
+    episode_str = f"Episode {seed:,}"
+    if output_subtitle:
+        episode_str += f": {output_subtitle}"
     # Prepare sanitized content
     
     # if not isinstance(entries, list) or not entries:
@@ -305,7 +322,7 @@ def build_section(c, section_title, seed, section):
     wrapped = [wrap_text(q["sentence"], TEXT_FONT, TEXT_SIZE, CONTENT_W) for q in questions]
 
     # ---------------- Page 1 ----------------
-    y = draw_header_page(c, section_title, subtitle, 1, 2)
+    y = draw_header_page(c, section_title, episode_str, 1, 2)
     y = draw_word_bank(c, word_counts, y)
     available_h = y - M_BOTTOM
 
@@ -319,14 +336,18 @@ def build_section(c, section_title, seed, section):
             break
 
     _, next_num = draw_questions(c, wrapped, 0, end_idx_p1, y, start_num=1)
+    presentation_variables["current_page"] = 1
+    draw_footer(c, footer_format, presentation_variables)
     c.showPage()
 
     # ---------------- Page 2 (questions continued) ----------------
-    y2 = draw_header_page(c, section_title, subtitle, 2, 2)
+    y2 = draw_header_page(c, section_title, episode_str, 2, 2)
     y2 -= EXTRA_SPACE_BEFORE_FIRST_Q
     available_h2 = y2 - M_BOTTOM
 
     _, next_num = draw_questions(c, wrapped, end_idx_p1, len(wrapped), y2, start_num=next_num)
+    presentation_variables["current_page"] = 2
+    draw_footer(c, footer_format, presentation_variables)
     c.showPage()
 
     # ---------------- Page 3 (ANSWER KEY) ----------------
@@ -336,9 +357,9 @@ def build_section(c, section_title, seed, section):
     c.drawString((PAGE_W - stringWidth(ak_header, TITLE_FONT, TITLE_SIZE)) / 2, y3, ak_header)
     y3 -= (TITLE_SIZE + 6)
 
-    if subtitle:
+    if episode_str:
         c.setFont(SUBTITLE_FONT, SUBTITLE_SIZE)
-        c.drawString((PAGE_W - stringWidth(subtitle, SUBTITLE_FONT, SUBTITLE_SIZE)) / 2, y3, subtitle)
+        c.drawString((PAGE_W - stringWidth(episode_str, SUBTITLE_FONT, SUBTITLE_SIZE)) / 2, y3, episode_str)
         y3 -= (SUBTITLE_SIZE + 16)
 
     c.setFont(TEXT_FONT, TEXT_SIZE)
@@ -357,18 +378,27 @@ def build_section(c, section_title, seed, section):
     c.showPage()
 
     
-def build_section_title(header, section_i):
-    # TODO: build section header, interpolate section_i
-    section_i_str = str(section_i)
-    return header.replace("{section}", section_i_str)
+def build_section_title(header_format, presentation_variables):
+    header_text = header_format
+    for key, value in presentation_variables.items():
+        placeholder = "{" + key + "}"
+        header_text = header_text.replace(placeholder, str(value))
+    return header_text
     
 def build_pdf(doc_root, output_stream):
     c = canvas.Canvas(output_stream, pagesize=letter)
-    
-    header = doc_root["presentation_metadata"]["header"]
+        
+    presentation_variables = {
+        "section": doc_root["presentation_metadata"]["section"],
+        "reading_level": doc_root["reading_level"]["level"],
+        "total_pages": 2,
+    }
+    header_format = doc_root["presentation_metadata"]["header"]
     seed = doc_root["seed"]
-    title = build_section_title(header, doc_root["presentation_metadata"]["section"])
-    build_section(c, title, seed, doc_root)
+
+    title = build_section_title(header_format, presentation_variables)
+    footer_format = str(doc_root["presentation_metadata"]["footer"])
+    build_section(c, title, seed, doc_root, footer_format, presentation_variables)
 
     c.save()
     

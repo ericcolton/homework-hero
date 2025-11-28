@@ -84,32 +84,22 @@ def build_output(request: dict, section_entries: list) -> dict:
     # Top-level fields coming straight from the input
     source_dataset = request["source_dataset"]
     reading_level = request["reading_level"]
+    section = str(request["section"])
     theme = request["theme"]
     model = request["model"]
     seed = request["seed"]
-
-    metadata = request.get("metadata", {})
-    # Prefer metadata.section, fall back to top-level 'section' if needed.
-    if "section" in metadata:
-        section_number = metadata["section"]
-    else:
-        section_number = request.get("section")
-    if section_number is None:
-        raise SystemExit("Section number not found in request (metadata.section or section).")
-
-    header = metadata.get("header")
-    footer = metadata.get("footer")
-    if header is None or footer is None:
-        raise SystemExit("metadata.header and metadata.footer must be present in the request.")
-
+    if section is None:
+        raise SystemExit("Section number not found in request (section).")
+    
     # Build doc_key = source_dataset | reading_level_token | model | theme | seed
     reading_level_token = build_reading_level_token(reading_level)
     doc_key = "|".join(
         [
             source_dataset,
             reading_level_token,
-            model,
+            section,
             theme,
+            model,
             str(seed),
         ]
     )
@@ -149,16 +139,12 @@ def build_output(request: dict, section_entries: list) -> dict:
         "type": request.get("type", "build_request"),
         "source_dataset": source_dataset,
         "reading_level": reading_level,
+        "section": section,
         "theme": theme,
         "model": model,
         "seed": seed,
         "doc_key": doc_key,
         "doc_checksum": doc_checksum,
-        "metadata": {
-            "section": section_number,
-            "header": header,
-            "footer": footer,
-        },
         "data": data_items,
     }
     return output
@@ -181,7 +167,7 @@ def main():
     source_dataset = request["source_dataset"]
     dataset = load_dataset(args.source_datasets, source_dataset)
 
-    # Determine section number from request (metadata.section or section)
+    # Determine section number from request (section)
     section_number = request.get("section")
     if section_number is None:
         raise SystemExit("Section number not found in request (section).")

@@ -4,7 +4,7 @@ Design a system to support vocabulary learning by generating context-driven sent
 # Instructions
 - For each definition of every vocabulary word in a section, create a high-quality, engaging sentence suitable for a fourth-grade reading level. Omit exactly one vocabulary word from the sentence, representing it with three pound signs (###). Construct each sentence so that only the intended word fits appropriately in the blank, uniquely matching its definition.
 - Ensure every definition is covered by a sentence to help students master all meanings. 
-- Generate a short, fun subtitle for each section. This subtitle must use some of the vocabulary words and definitions from the section, and should be added as a string in a field called `subtitle` at the top level of the output object.
+- Generate a short, fun subtitle for each section. This subtitle must use some of the vocabulary words and definitions from the section, and should be added as a string in a field called `subtitle` at the top level of the output object. It should be about 8 words in length but should never exceed 10 words.
 - All sentences and the subtitle for a section should revolve around a theme, specified as input by the user.
 - Output must be a JSON object mapping checksum values to subtitles and sentences, reflecting the structure and order of the input.
 

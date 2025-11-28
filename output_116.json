@@ -1,0 +1,200 @@
+{
+  "type": "check_cache",
+  "source_dataset": "wordly_wise_3000_book_3",
+  "reading_level": {
+    "system": "fp",
+    "level": "P"
+  },
+  "section": "8",
+  "theme": "kpop_demon_hunters",
+  "model": "gpt-5-mini",
+  "seed": 116,
+  "doc_key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116",
+  "doc_checksum": "8fcfbc293f33ebe5",
+  "data": [
+    {
+      "word": "contain",
+      "part_of_speech": "verb",
+      "definition": "To hold; to have within itself.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|contain|verb|To hold; to have within itself.",
+      "checksum": "5b1019364898810d",
+      "output": {
+        "sentence": "Rumi's green case can ### the band's microphones and sparkly costumes."
+      }
+    },
+    {
+      "word": "container",
+      "part_of_speech": "noun",
+      "definition": "A jar, box, or other object used for holding something.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|container|noun|A jar, box, or other object used for holding something.",
+      "checksum": "231ce63489618949",
+      "output": {
+        "sentence": "Mira put the enchanted bead in a small ### on the stage so it would not get lost."
+      }
+    },
+    {
+      "word": "digest",
+      "part_of_speech": "verb",
+      "definition": "To change food that has been eaten into simpler forms that the body can use.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|digest|verb|To change food that has been eaten into simpler forms that the body can use.",
+      "checksum": "84345c828385270c",
+      "output": {
+        "sentence": "After the big rehearsal, Zoey's stomach needed time to ### the spicy rice bowl."
+      }
+    },
+    {
+      "word": "finicky",
+      "part_of_speech": "adjective",
+      "definition": "Hard to please; fussy.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|finicky|adjective|Hard to please; fussy.",
+      "checksum": "16a922904d096161",
+      "output": {
+        "sentence": "Baby Saja is so ### that he will only eat the blue cupcakes."
+      }
+    },
+    {
+      "word": "habit",
+      "part_of_speech": "noun",
+      "definition": "Something that a person does so often that it is done without thinking.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|habit|noun|Something that a person does so often that it is done without thinking.",
+      "checksum": "64644f0f49a7935e",
+      "output": {
+        "sentence": "Jinu's warm-up routine is a ### he does before every show."
+      }
+    },
+    {
+      "word": "habit",
+      "part_of_speech": "noun",
+      "definition": "A special kind of clothing worn by certain groups.",
+      "def_num": 2,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|habit|noun|A special kind of clothing worn by certain groups.",
+      "checksum": "6a13e8cabbd1e17f",
+      "output": {
+        "sentence": "The shrine helper wore a simple ### that showed he belonged to the group."
+      }
+    },
+    {
+      "word": "hinge",
+      "part_of_speech": "noun",
+      "definition": "A joint on a lid or door that allows it to swing open or shut.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|hinge|noun|A joint on a lid or door that allows it to swing open or shut.",
+      "checksum": "d71b8a7ff2b310ab",
+      "output": {
+        "sentence": "Rumi pushed the heavy gate, but the rusty ### creaked and stuck."
+      }
+    },
+    {
+      "word": "marsh",
+      "part_of_speech": "noun",
+      "definition": "A low-lying area, often covered with tall grasses, where the ground is soft and wet.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|marsh|noun|A low-lying area, often covered with tall grasses, where the ground is soft and wet.",
+      "checksum": "2ff5f98529be3e2b",
+      "output": {
+        "sentence": "The team crossed a spooky ### where tall grasses whispered and the ground was soft."
+      }
+    },
+    {
+      "word": "marshy",
+      "part_of_speech": "adjective",
+      "definition": "Soft and moist underfoot.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|marshy|adjective|Soft and moist underfoot.",
+      "checksum": "84ec83e1e521a029",
+      "output": {
+        "sentence": "Zoey's shoes sank into the ### ground near the old stage."
+      }
+    },
+    {
+      "word": "nursery",
+      "part_of_speech": "noun",
+      "definition": "A room or other place set aside for the use of babies and small children.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|nursery|noun|A room or other place set aside for the use of babies and small children.",
+      "checksum": "1c7367a77e68a695",
+      "output": {
+        "sentence": "After the concert, Mira rocked Baby Saja in the warm ### backstage."
+      }
+    },
+    {
+      "word": "nursery",
+      "part_of_speech": "noun",
+      "definition": "A place where plants are grown for sale.",
+      "def_num": 2,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|nursery|noun|A place where plants are grown for sale.",
+      "checksum": "6910f42dfc67e2ce",
+      "output": {
+        "sentence": "Huntrix practiced in a quiet ### full of seedlings and bright pots."
+      }
+    },
+    {
+      "word": "rely",
+      "part_of_speech": "verb",
+      "definition": "To count on; to look to for support.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|rely|verb|To count on; to look to for support.",
+      "checksum": "6995a40887ffc8c8",
+      "output": {
+        "sentence": "Rumi knew she could ### on Mira to sing the high notes."
+      }
+    },
+    {
+      "word": "reliable",
+      "part_of_speech": "adjective",
+      "definition": "Trustworthy; not likely to fail.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|reliable|adjective|Trustworthy; not likely to fail.",
+      "checksum": "83df744eea62c016",
+      "output": {
+        "sentence": "Jinu fixed the old speaker because it had to be ### for the big show."
+      }
+    },
+    {
+      "word": "spine",
+      "part_of_speech": "noun",
+      "definition": "The backbone.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|spine|noun|The backbone.",
+      "checksum": "dc934c092ceb4bf1",
+      "output": {
+        "sentence": "Zoey hugged the injured monster and the healer checked its ### to see if it was hurt."
+      }
+    },
+    {
+      "word": "spine",
+      "part_of_speech": "noun",
+      "definition": "A thin, sharp, stiff part that sticks out on certain plants and animals.",
+      "def_num": 2,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|spine|noun|A thin, sharp, stiff part that sticks out on certain plants and animals.",
+      "checksum": "6368ee2022c46ca9",
+      "output": {
+        "sentence": "The demon rolled up to hide its soft belly and the hunters saw a long ### on its tail."
+      }
+    },
+    {
+      "word": "thrive",
+      "part_of_speech": "verb",
+      "definition": "To do well; to grow strong and healthy.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|8|kpop_demon_hunters|gpt-5-mini|116|thrive|verb|To do well; to grow strong and healthy.",
+      "checksum": "f55822095228a308",
+      "output": {
+        "sentence": "After they left the scary mall, the small garden on stage began to ### under the bright lights."
+      }
+    }
+  ],
+  "output": {
+    "subtitle": "Rumi and Mira rely on a reliable container to protect instruments so the Saja Boys can thrive."
+  },
+  "presentation_metadata": {
+    "header": "Avery's KPop Vocab - Section {section}",
+    "footer": "Page {current_page} of {total_pages}",
+    "section": 7
+  }
+}

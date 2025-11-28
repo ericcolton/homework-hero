@@ -86,10 +86,9 @@ def main(argv=None):
     default_responses_datastore, default_scripts_dir = load_env_defaults()
     args = parse_args(argv, default_responses_datastore=default_responses_datastore, default_scripts_dir=default_scripts_dir)
 
-    # Read JSON request from stdin and save to variable for later access
-    stdin_data = sys.stdin.read()
+    # Read JSON request from stdin
     try:
-        request = json.loads(stdin_data)
+        request = json.load(sys.stdin)
     except json.JSONDecodeError as e:
         print(f"Error: Failed to parse JSON from stdin: {e}", file=sys.stderr)
         sys.exit(1)
@@ -115,18 +114,24 @@ def main(argv=None):
     cache_path = (
         datastore_root
         / str(source_dataset)
-        / str(theme)
         / reading_level_segment
-        / str(model)
         / str(section)
+        / str(theme)
+        / str(model)
         / f"{seed}.json"
     )
 
     if not cache_path.is_file():
+
+        phase_3_input_json = json.dumps(request, ensure_ascii=False)
+        # Remove presentation_metadata from phase3 input
+        phase_3_input = json.loads(phase_3_input_json)
+        phase_3_input.pop("presentation_metadata", None)
+
         phase3_path = Path(args.scripts) / "phase3.py"
         process = subprocess.run(
             ["python3", str(phase3_path)],
-            input=stdin_data,
+            input=json.dumps(phase_3_input, ensure_ascii=False),
             text=True,
             capture_output=True
         )
@@ -168,9 +173,9 @@ def main(argv=None):
 
     # Emit combined JSON to stdout
     # Add the presentation_metadata from the original request if present
-    # request_metadata = request.get("presentation_metadata")
-    # if request_metadata:
-    #     output_payload["presentation_metadata"] = request_metadata
+    request_metadata = request.get("presentation_metadata")
+    if request_metadata:
+        output_payload["presentation_metadata"] = request_metadata
 
     json.dump(output_payload, sys.stdout, ensure_ascii=False, indent=2)
     sys.stdout.write("\n")

@@ -2,10 +2,10 @@
     "type": "check_cache",
     "presentation_metadata": {
       "header": "Avery's KPop Vocab - Section {section}",
-      "footer": "Page {current_page} of {total_pages}",
+      "footer": "Level {reading_level} / Page {current_page} of {total_pages}",
       "section": 7
     },
-    "seed": 115,
+    "seed": 118,
     "reading_level": {"system": "fp", "level": "P"},
     "model": "gpt-5-mini",
     "theme": "kpop_demon_hunters",
