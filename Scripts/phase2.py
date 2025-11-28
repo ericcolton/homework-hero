@@ -123,12 +123,6 @@ def main(argv=None):
     )
 
     if not cache_path.is_file():
-        # print(
-        #     f"Error: Cache file not found at: {cache_path}",
-        #     file=sys.stderr,
-        # )
-        # sys.exit(1)
-        # If cache file is missing, execute phase3.py with stdin_data
         phase3_path = Path(args.scripts) / "phase3.py"
         process = subprocess.run(
             ["python3", str(phase3_path)],
@@ -167,18 +161,18 @@ def main(argv=None):
     # Load payload from cache file
     try:
         with cache_path.open("r", encoding="utf-8") as f:
-            payload = json.load(f)
+            output_payload = json.load(f)
     except (OSError, json.JSONDecodeError) as e:
         print(f"Error: Failed to read/parse cache file: {e}", file=sys.stderr)
         sys.exit(1)
 
     # Emit combined JSON to stdout
-    output = {
-        "request": request,
-        "payload": payload,
-    }
+    # Add the presentation_metadata from the original request if present
+    # request_metadata = request.get("presentation_metadata")
+    # if request_metadata:
+    #     output_payload["presentation_metadata"] = request_metadata
 
-    json.dump(output, sys.stdout, ensure_ascii=False, indent=2)
+    json.dump(output_payload, sys.stdout, ensure_ascii=False, indent=2)
     sys.stdout.write("\n")
 
 

@@ -1,6 +1,6 @@
 {
     "type": "check_cache",
-    "metadata": {
+    "presentation_metadata": {
       "header": "Avery's KPop Vocab - Section {section}",
       "footer": "Page {current_page} of {total_pages}",
       "section": 7

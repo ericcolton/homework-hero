@@ -175,22 +175,6 @@ def call_openai(
     print(f"raw_text: {response_text}", file=sys.stderr)
     exit(1)
 
-    # # Get the aggregated text form of the model output (convenience property). :contentReference[oaicite:4]{index=4}
-    # response_text = getattr(response, "output_text", None)
-
-    # if response_text is None:
-    #     # Fallback: serialize the full response object if output_text isn't present.
-    #     # The OpenAI objects are Pydantic models, so we can use model_dump(). :contentReference[oaicite:5]{index=5}
-    #     return response.model_dump()
-
-    # # Try to interpret the model's output as JSON. If that fails, wrap raw text.
-    # try:
-    #     parsed = json.loads(response_text)
-    #     return parsed
-    # except json.JSONDecodeError:
-    #     return {"raw_text": response_text}
-
-
 def append_response_json(request_json: Dict[str, Any], response_json: JsonOutputFormat):
     req_doc_checksum = request_json.get("doc_checksum")
     if not req_doc_checksum:
