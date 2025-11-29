@@ -1,0 +1,14 @@
+[
+    {
+        "id": 1,
+        "short_name": "gpt-5-nano"
+    },
+    {
+        "id": 2,
+        "short_name": "gpt-5-mini"
+    },
+    {
+        "id": 3,
+        "short_name": "gpt-5.1"
+    }
+]

@@ -4,6 +4,7 @@ import json
 import subprocess
 import os
 import sys
+import hashlib
 from pathlib import Path
 
 
@@ -27,12 +28,11 @@ def build_reading_level_segment(reading_level):
 
 def load_env_defaults():
     """
-    If HOMEWORK_HERO_CONFIG_PATH is set, load JSON and return
-    config["source_datasets"] as the default datastore path.
+    If HOMEWORK_HERO_CONFIG_PATH is set, load JSON and return config dict and path.
     """
     config_path = os.environ.get("HOMEWORK_HERO_CONFIG_PATH")
     if not config_path:
-        return None, None
+        return None, None, None
 
     try:
         with open(config_path, "r", encoding="utf-8") as f:
@@ -52,7 +52,7 @@ def load_env_defaults():
             f"Config at HOMEWORK_HERO_CONFIG_PATH='{config_path}' missing 'scripts'."
         )
     
-    return default_responses_datastore, default_scripts_dir
+    return default_responses_datastore, default_scripts_dir, config_path
 
 
 def parse_args(argv=None, default_responses_datastore=None, default_scripts_dir=None):
@@ -81,9 +81,156 @@ def parse_args(argv=None, default_responses_datastore=None, default_scripts_dir=
     )
     return parser.parse_args(argv)
 
+def build_worksheet_id(request, config_path):
+    """
+    Encode source_dataset, theme, reading_level, model, section, and seed into an opaque
+    but reversible integer worksheet_id.
+    
+    - Lookups reference data files from config["reference_data"] directory
+    - Encodes IDs using bit packing and reversible obfuscation
+    - Exits with non-zero code if any lookup fails
+    """
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        raise SystemExit(f"Failed to load config from '{config_path}': {e}") from e
+
+    reference_data_dir = config.get("reference_data")
+    if not reference_data_dir:
+        raise SystemExit(
+            f"Config at '{config_path}' missing 'reference_data' key."
+        )
+
+    reference_data_dir = Path(reference_data_dir)
+
+    # Extract required fields from request
+    try:
+        source_dataset = request["source_dataset"]
+        theme = request["theme"]
+        reading_level = request["reading_level"]
+        model = request["model"]
+        section = request["section"]
+        seed = request["seed"]
+    except KeyError as e:
+        raise SystemExit(f"Request missing required field for worksheeet_id: {e}") from e
+
+    # Helper: load reference file and return list of items
+    def load_list(filename, field_name):
+        ref_path = reference_data_dir / filename
+        try:
+            with open(ref_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                data = [data]
+            if not isinstance(data, list):
+                raise SystemExit(f"Reference file {filename} ({field_name}) is not a list or object.")
+            return data
+        except (OSError, json.JSONDecodeError) as e:
+            raise SystemExit(f"Failed to load reference data from {filename} ({field_name}): {e}") from e
+
+    # Load lists and compute index mapping based on short_name
+    datasets = load_list("source_datasets.json", "source_dataset")
+    themes = load_list("themes.json", "theme")
+    models = load_list("models.json", "model")
+
+    def find_index_by_shortname(items, short_name, filename):
+        for idx, item in enumerate(items):
+            if item.get("short_name") == short_name:
+                return idx
+        raise SystemExit(f"Could not find short_name '{short_name}' in {filename}.")
+
+    dataset_idx = find_index_by_shortname(datasets, source_dataset, "source_datasets.json")
+    theme_idx = find_index_by_shortname(themes, theme, "themes.json")
+    model_idx = find_index_by_shortname(models, model, "models.json")
+
+    # Find reading_level_id
+    if isinstance(reading_level, dict):
+        reading_system = reading_level.get("system", None)
+        reading_level_val = reading_level.get("level", None)
+        if reading_system is None or reading_level_val is None:
+            raise SystemExit(
+                "reading_level must contain 'system' and 'level' keys."
+            )
+        if reading_system == "fp":
+            # 'A' -> 0, 'B' -> 1, etc.
+            reading_level_id = ord(str(reading_level_val).upper()) - ord('A')
+        elif reading_system == "grade":
+            reading_level_id = int(reading_level_val) + 30
+        else:
+            raise SystemExit(
+                f"Unknown reading_level system: '{reading_system}'."
+            )
+    else:
+        # Accept integers or numeric strings as fallback
+        try:
+            reading_level_id = int(reading_level)
+        except Exception:
+            raise SystemExit("reading_level must be a dict or integer-like value.") from None
+
+    # Normalize and validate integer fields (section and seed may be strings)
+    try:
+        section_int = int(section)
+    except Exception:
+        raise SystemExit("section must be an integer or integer-like string.") from None
+
+    try:
+        seed_int = int(seed)
+    except Exception:
+        raise SystemExit("seed must be an integer or integer-like string.") from None
+
+    # Bit-size allocations (must match the spec)
+    DATASET_BITS = 5
+    THEME_BITS = 6
+    MODEL_BITS = 4
+    READING_BITS = 6
+    SECTION_BITS = 5
+    SEED_BITS = 6
+
+    # Validate index ranges
+    if not (0 <= dataset_idx < (1 << DATASET_BITS)):
+        raise SystemExit(f"dataset_idx {dataset_idx} out of range for {DATASET_BITS} bits")
+    if not (0 <= theme_idx < (1 << THEME_BITS)):
+        raise SystemExit(f"theme_idx {theme_idx} out of range for {THEME_BITS} bits")
+    if not (0 <= model_idx < (1 << MODEL_BITS)):
+        raise SystemExit(f"model_idx {model_idx} out of range for {MODEL_BITS} bits")
+    if not (0 <= reading_level_id < (1 << READING_BITS)):
+        raise SystemExit(f"reading_level_id {reading_level_id} out of range for {READING_BITS} bits")
+    if not (0 <= section_int < (1 << SECTION_BITS)):
+        raise SystemExit(f"section {section_int} out of range for {SECTION_BITS} bits")
+    if not (0 <= seed_int < (1 << SEED_BITS)):
+        raise SystemExit(f"seed {seed_int} out of range for {SEED_BITS} bits")
+
+    # Bit positions (seed lowest)
+    seed_shift = 0
+    section_shift = seed_shift + SEED_BITS
+    reading_shift = section_shift + SECTION_BITS
+    model_shift = reading_shift + READING_BITS
+    theme_shift = model_shift + MODEL_BITS
+    dataset_shift = theme_shift + THEME_BITS
+
+    packed = (
+        ((dataset_idx & ((1 << DATASET_BITS) - 1)) << dataset_shift)
+        | ((theme_idx & ((1 << THEME_BITS) - 1)) << theme_shift)
+        | ((model_idx & ((1 << MODEL_BITS) - 1)) << model_shift)
+        | ((reading_level_id & ((1 << READING_BITS) - 1)) << reading_shift)
+        | ((section_int & ((1 << SECTION_BITS) - 1)) << section_shift)
+        | ((seed_int & ((1 << SEED_BITS) - 1)) << seed_shift)
+    )
+
+    # Reversible obfuscation: XOR with a fixed 32-bit key, then add 1 to ensure non-zero.
+    OBFUSCATION_KEY = 0xA5A5A5A5
+    obfuscated = (packed ^ OBFUSCATION_KEY) + 1
+
+    # Ensure within required bounds (1 .. 1_000_000_000_000)
+    if not (1 <= obfuscated <= 1_000_000_000_000):
+        raise SystemExit("Generated worksheet_id is out of allowed bounds.")
+
+    return int(obfuscated)
+
 
 def main(argv=None):
-    default_responses_datastore, default_scripts_dir = load_env_defaults()
+    default_responses_datastore, default_scripts_dir, config_path = load_env_defaults()
     args = parse_args(argv, default_responses_datastore=default_responses_datastore, default_scripts_dir=default_scripts_dir)
 
     # Read JSON request from stdin
@@ -127,6 +274,10 @@ def main(argv=None):
         # Remove presentation_metadata from phase3 input
         phase_3_input = json.loads(phase_3_input_json)
         phase_3_input.pop("presentation_metadata", None)
+
+        # Build and add worksheet_id
+        worksheet_id = build_worksheet_id(request, config_path)
+        phase_3_input["worksheet_id"] = worksheet_id
 
         phase3_path = Path(args.scripts) / "phase3.py"
         process = subprocess.run(

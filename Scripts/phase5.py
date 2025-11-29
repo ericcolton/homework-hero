@@ -36,6 +36,7 @@ import os
 import random
 import sys
 from collections import Counter, defaultdict
+import hashlib
 
 # ReportLab
 from reportlab.lib.pagesizes import letter
@@ -283,12 +284,8 @@ def build_section(c, section_title, seed, section, footer_format, presentation_v
     
     output_subtitle = section["output"]["subtitle"]
     entries = section["data"]
-    
-    # Create episode string with comma-formatted seed
-    episode_str = f"Episode {seed:,}"
-    if output_subtitle:
-        episode_str += f": {output_subtitle}"
-    # Prepare sanitized content
+
+    subtitle_with_episode = f"Episode {seed}: " + output_subtitle
     
     # if not isinstance(entries, list) or not entries:
     #     print("Error: JSON must be a non-empty list of entries.", file=sys.stderr)
@@ -322,7 +319,7 @@ def build_section(c, section_title, seed, section, footer_format, presentation_v
     wrapped = [wrap_text(q["sentence"], TEXT_FONT, TEXT_SIZE, CONTENT_W) for q in questions]
 
     # ---------------- Page 1 ----------------
-    y = draw_header_page(c, section_title, episode_str, 1, 2)
+    y = draw_header_page(c, section_title, subtitle_with_episode, 1, 2)
     y = draw_word_bank(c, word_counts, y)
     available_h = y - M_BOTTOM
 
@@ -341,7 +338,7 @@ def build_section(c, section_title, seed, section, footer_format, presentation_v
     c.showPage()
 
     # ---------------- Page 2 (questions continued) ----------------
-    y2 = draw_header_page(c, section_title, episode_str, 2, 2)
+    y2 = draw_header_page(c, section_title, subtitle_with_episode, 2, 2)
     y2 -= EXTRA_SPACE_BEFORE_FIRST_Q
     available_h2 = y2 - M_BOTTOM
 
@@ -357,9 +354,9 @@ def build_section(c, section_title, seed, section, footer_format, presentation_v
     c.drawString((PAGE_W - stringWidth(ak_header, TITLE_FONT, TITLE_SIZE)) / 2, y3, ak_header)
     y3 -= (TITLE_SIZE + 6)
 
-    if episode_str:
+    if subtitle_with_episode:
         c.setFont(SUBTITLE_FONT, SUBTITLE_SIZE)
-        c.drawString((PAGE_W - stringWidth(episode_str, SUBTITLE_FONT, SUBTITLE_SIZE)) / 2, y3, episode_str)
+        c.drawString((PAGE_W - stringWidth(subtitle_with_episode, SUBTITLE_FONT, SUBTITLE_SIZE)) / 2, y3, subtitle_with_episode)
         y3 -= (SUBTITLE_SIZE + 16)
 
     c.setFont(TEXT_FONT, TEXT_SIZE)
@@ -388,9 +385,16 @@ def build_section_title(header_format, presentation_variables):
 def build_pdf(doc_root, output_stream):
     c = canvas.Canvas(output_stream, pagesize=letter)
         
+    # Format worksheet_id with thousands separators for presentation
+    formatted_worksheet_id = f"{int(doc_root.get('worksheet_id')):,}"
+
     presentation_variables = {
         "section": doc_root["presentation_metadata"]["section"],
+        "reading_system": doc_root["reading_level"]["system"],
         "reading_level": doc_root["reading_level"]["level"],
+        "model": doc_root["model"],
+        "seed": doc_root["seed"],
+        "worksheet_id": formatted_worksheet_id,
         "total_pages": 2,
     }
     header_format = doc_root["presentation_metadata"]["header"]

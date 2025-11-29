@@ -88,6 +88,7 @@ def build_output(request: dict, section_entries: list) -> dict:
     theme = request["theme"]
     model = request["model"]
     seed = request["seed"]
+    worksheet_id = request["worksheet_id"]
     if section is None:
         raise SystemExit("Section number not found in request (section).")
     
@@ -143,6 +144,7 @@ def build_output(request: dict, section_entries: list) -> dict:
         "theme": theme,
         "model": model,
         "seed": seed,
+        "worksheet_id": worksheet_id,
         "doc_key": doc_key,
         "doc_checksum": doc_checksum,
         "data": data_items,
