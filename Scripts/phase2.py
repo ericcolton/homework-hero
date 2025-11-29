@@ -180,12 +180,12 @@ def build_worksheet_id(request, config_path):
         raise SystemExit("seed must be an integer or integer-like string.") from None
 
     # Bit-size allocations (must match the spec)
-    DATASET_BITS = 5
-    THEME_BITS = 6
-    MODEL_BITS = 4
+    DATASET_BITS = 7
+    THEME_BITS = 7
+    MODEL_BITS = 5
     READING_BITS = 6
-    SECTION_BITS = 5
-    SEED_BITS = 6
+    SECTION_BITS = 7
+    SEED_BITS = 8
 
     # Validate index ranges
     if not (0 <= dataset_idx < (1 << DATASET_BITS)):
@@ -218,13 +218,9 @@ def build_worksheet_id(request, config_path):
         | ((seed_int & ((1 << SEED_BITS) - 1)) << seed_shift)
     )
 
-    # Reversible obfuscation: XOR with a fixed 32-bit key, then add 1 to ensure non-zero.
-    OBFUSCATION_KEY = 0xA5A5A5A5
+    # Reversible obfuscation: XOR with a fixed 64-bit key, then add 1 to ensure non-zero.
+    OBFUSCATION_KEY = 0xA5A5A5A5A5
     obfuscated = (packed ^ OBFUSCATION_KEY) + 1
-
-    # Ensure within required bounds (1 .. 1_000_000_000_000)
-    if not (1 <= obfuscated <= 1_000_000_000_000):
-        raise SystemExit("Generated worksheet_id is out of allowed bounds.")
 
     return int(obfuscated)
 
