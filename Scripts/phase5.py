@@ -272,7 +272,7 @@ def draw_questions(c, wrapped_questions, start_idx, end_idx, y_start, start_num=
         y -= BASE_GAP_BETWEEN_PROBLEMS
     return y, qnum
 
-def draw_footer(c, footer_format, presentation_metadata):
+def draw_footer(c, footer_format, presentation_metadata, draw_qr_code=False):
     """Draw a footer at the bottom of the page based on footer_metadata."""
     if not footer_format:
         return
@@ -285,8 +285,11 @@ def draw_footer(c, footer_format, presentation_metadata):
         placeholder = "{" + key + "}"
         footer_text = footer_text.replace(placeholder, str(value))
 
-    renderPDF.draw(presentation_metadata["qr_code"], c, M_LEFT, M_BOTTOM / 2 - 20) if presentation_metadata.get("qr_code") else None
-    c.drawString((PAGE_W - stringWidth(footer_text, TEXT_FONT, TEXT_SIZE - 2)) / 2, M_BOTTOM / 2, footer_text)
+    if draw_qr_code and presentation_metadata.get("qr_code"):
+        renderPDF.draw(presentation_metadata["qr_code"], c, M_LEFT, M_BOTTOM / 2 - 20)
+    # center the footer text on the page
+    center_x = (PAGE_W - stringWidth(footer_text, TEXT_FONT, TEXT_SIZE - 2)) / 2
+    c.drawString(center_x, M_BOTTOM / 2, footer_text)
 
 def build_section(c, section_title, seed, section, footer_format, answer_key_footer_format, presentation_variables):
     
@@ -380,7 +383,7 @@ def build_section(c, section_title, seed, section, footer_format, answer_key_foo
         # c.drawString(M_LEFT + 18, y3, f"— {q['definition']} ({q['pos']})")
         # y3 -= (TEXT_SIZE + 4)
     
-    draw_footer(c, answer_key_footer_format, presentation_variables)
+    draw_footer(c, answer_key_footer_format, presentation_variables, True)
     c.showPage()
 
     
