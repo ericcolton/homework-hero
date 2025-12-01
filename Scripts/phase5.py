@@ -37,12 +37,17 @@ import random
 import sys
 from collections import Counter, defaultdict
 import hashlib
+import io
 
 # ReportLab
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.graphics.barcode.qr import QrCodeWidget
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics import renderPDF
+from reportlab.lib.utils import ImageReader
 
 # -----------------------------
 # Layout and style constants
@@ -275,9 +280,12 @@ def draw_footer(c, footer_format, presentation_metadata):
     c.setFont(TEXT_FONT, TEXT_SIZE - 2)
     footer_text = footer_format
     for key, value in presentation_metadata.items():
+        if key == "qr_code":
+            continue
         placeholder = "{" + key + "}"
         footer_text = footer_text.replace(placeholder, str(value))
 
+    renderPDF.draw(presentation_metadata["qr_code"], c, M_LEFT, M_BOTTOM / 2 - 20) if presentation_metadata.get("qr_code") else None
     c.drawString((PAGE_W - stringWidth(footer_text, TEXT_FONT, TEXT_SIZE - 2)) / 2, M_BOTTOM / 2, footer_text)
 
 def build_section(c, section_title, seed, section, footer_format, presentation_variables):
@@ -386,6 +394,8 @@ def build_pdf(doc_root, output_stream):
     c = canvas.Canvas(output_stream, pagesize=letter)
         
     worksheet_id = doc_root.get('worksheet_id')
+    
+    
     presentation_variables = {
         "section": doc_root["presentation_metadata"]["section"],
         "reading_system": doc_root["reading_level"]["system"],
@@ -395,6 +405,22 @@ def build_pdf(doc_root, output_stream):
         "worksheet_id": worksheet_id,
         "total_pages": 2,
     }
+
+    # Generate QR code image for http://cindysoftware.com/ws={worksheet_id}
+    try:
+        base_url = f"http://cindysoftware.com/id={worksheet_id}" if worksheet_id is not None else "http://cindysoftware.com/ws="
+        qr_widget = QrCodeWidget(base_url)
+        b = qr_widget.getBounds()
+        w = b[2] - b[0]
+        h = b[3] - b[1]
+        d = Drawing(w, h)
+        d.add(qr_widget)
+        #png_bytes = renderPM.drawToString(d, fmt="PNG")
+        #presentation_variables["qr_code"] = ImageReader(io.BytesIO(png_bytes))
+        presentation_variables["qr_code"] = d
+    except Exception:
+        presentation_variables["qr_code"] = None
+
     header_format = doc_root["presentation_metadata"]["header"]
     seed = doc_root["seed"]
 
