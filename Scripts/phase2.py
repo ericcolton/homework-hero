@@ -331,6 +331,7 @@ def main(argv=None):
     # Add the presentation_metadata from the original request if present
     request_metadata = request.get("presentation_metadata")
     if request_metadata:
+        request_metadata["section"] = section
         output_payload["presentation_metadata"] = request_metadata
 
     json.dump(output_payload, sys.stdout, ensure_ascii=False, indent=2)
