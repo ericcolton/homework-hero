@@ -272,7 +272,7 @@ def draw_questions(c, wrapped_questions, start_idx, end_idx, y_start, start_num=
         y -= BASE_GAP_BETWEEN_PROBLEMS
     return y, qnum
 
-def draw_footer(c, footer_format, presentation_metadata, draw_qr_code=False):
+def draw_questions_footer(c, footer_format, presentation_metadata):
     """Draw a footer at the bottom of the page based on footer_metadata."""
     if not footer_format:
         return
@@ -285,8 +285,52 @@ def draw_footer(c, footer_format, presentation_metadata, draw_qr_code=False):
         placeholder = "{" + key + "}"
         footer_text = footer_text.replace(placeholder, str(value))
 
-    if draw_qr_code and presentation_metadata.get("qr_code"):
-        renderPDF.draw(presentation_metadata["qr_code"], c, M_LEFT, M_BOTTOM / 2 - 20)
+    # center the footer text on the page
+    center_x = (PAGE_W - stringWidth(footer_text, TEXT_FONT, TEXT_SIZE - 2)) / 2
+    c.drawString(center_x, M_BOTTOM / 2, footer_text)
+
+def draw_answers_footer(c, footer_format, presentation_metadata):
+    """Draw a footer at the bottom of the page based on footer_metadata."""
+    if not footer_format:
+        return
+    
+    c.setFont(TEXT_FONT, TEXT_SIZE - 2)
+    footer_text = footer_format
+    for key, value in presentation_metadata.items():
+        if key == "qr_code":
+            continue
+        placeholder = "{" + key + "}"
+        footer_text = footer_text.replace(placeholder, str(value))
+
+    if presentation_metadata.get("qr_code"):
+        qr = presentation_metadata["qr_code"]
+        try:
+            b = qr.getBounds()
+            qr_w = (b[2] - b[0]) if b else 40
+            qr_h = (b[3] - b[1]) if b else 40
+        except Exception:
+            qr_w = qr_h = 40
+
+        qr_x = M_LEFT
+        # raise the QR slightly (15 pts up from baseline)
+        # qr_y = M_BOTTOM / 2 - (qr_h / 2) + 15
+        qr_y = M_BOTTOM / 2 - (qr_h / 2) + 50
+        try:
+            renderPDF.draw(qr, c, qr_x, qr_y)
+        except Exception:
+            pass
+
+        # draw "Get Episode X" text centered below the QR
+        seed = int(presentation_metadata.get("seed"))
+        next_seed = str(seed + 1)
+        if seed is not None:
+            episode_text = f"Get Episode {next_seed}"
+            c.setFont(TEXT_FONT, TEXT_SIZE - 2)
+            ep_w = stringWidth(episode_text, TEXT_FONT, TEXT_SIZE - 2)
+            ep_x = qr_x + max(0, (qr_w - ep_w) / 2)
+            ep_y = qr_y - (TEXT_SIZE - 2) - 4
+            c.drawString(ep_x, M_BOTTOM / 2, episode_text)
+
     # center the footer text on the page
     center_x = (PAGE_W - stringWidth(footer_text, TEXT_FONT, TEXT_SIZE - 2)) / 2
     c.drawString(center_x, M_BOTTOM / 2, footer_text)
@@ -345,7 +389,7 @@ def build_section(c, section_title, seed, section, footer_format, answer_key_foo
 
     _, next_num = draw_questions(c, wrapped, 0, end_idx_p1, y, start_num=1)
     presentation_variables["current_page"] = 1
-    draw_footer(c, footer_format, presentation_variables)
+    draw_questions_footer(c, footer_format, presentation_variables)
     c.showPage()
 
     # ---------------- Page 2 (questions continued) ----------------
@@ -355,7 +399,7 @@ def build_section(c, section_title, seed, section, footer_format, answer_key_foo
 
     _, next_num = draw_questions(c, wrapped, end_idx_p1, len(wrapped), y2, start_num=next_num)
     presentation_variables["current_page"] = 2
-    draw_footer(c, footer_format, presentation_variables)
+    draw_questions_footer(c, footer_format, presentation_variables)
     c.showPage()
 
     # ---------------- Page 3 (ANSWER KEY) ----------------
@@ -383,7 +427,7 @@ def build_section(c, section_title, seed, section, footer_format, answer_key_foo
         # c.drawString(M_LEFT + 18, y3, f"— {q['definition']} ({q['pos']})")
         # y3 -= (TEXT_SIZE + 4)
     
-    draw_footer(c, answer_key_footer_format, presentation_variables, True)
+    draw_answers_footer(c, answer_key_footer_format, presentation_variables)
     c.showPage()
 
     

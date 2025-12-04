@@ -3,7 +3,7 @@
     "presentation_metadata": {
       "header": "Avery's KPop Vocab - Section {section}",
       "footer": "Page {current_page} of {total_pages}",
-      "answer_key_footer": "Get more of these! * Worksheet {worksheet_id} * Level {reading_level}"
+      "answer_key_footer": "Fountas & Pinnell Level {reading_level}"
     },
     "seed": 2,
     "reading_level": {"system": "fp", "level": "P"},
