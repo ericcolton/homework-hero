@@ -443,7 +443,7 @@ def build_section(c, section_title, seed, section, footer_format, answer_key_foo
         x_word = M_LEFT + stringWidth(num_text, TEXT_FONT, TEXT_SIZE)
         c.setFont(TITLE_FONT, TEXT_SIZE)  # bold
         c.drawString(x_word, y3, q['word'])
-## xxx
+
         # definition (smaller font) aligned to fixed x_def
         c.setFont(SUBTITLE_FONT, def_size)
         def_text = f"  {q['definition']} ({q['pos']})"
