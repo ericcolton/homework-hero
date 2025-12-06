@@ -1,0 +1,48 @@
+{
+  "title": "FOT Animal Adaptation",
+  "dataset_title": "fot_animal_adaptation",
+  "dataset_type": "vocabulary",
+  "sections": [
+    {
+      "section": 1,
+      "entries": [
+        {
+          "word": "adaptation",
+          "part_of_speech": "noun",
+          "definition": "Any characteristic that helps a plant or animal survive.",
+          "def_num": 1
+        },
+        {
+          "word": "environment",
+          "part_of_speech": "noun",
+          "definition": "The space, conditions, and all the living and nonliving things around an organism.",
+          "def_num": 1
+        },
+        {
+          "word": "inherited",
+          "part_of_speech": "adjective",
+          "definition": "Passed on from parent to offspring.",
+          "def_num": 1
+        },
+        {
+          "word": "survive",
+          "part_of_speech": "verb",
+          "definition": "To continue living and remain in existence.",
+          "def_num": 1
+        },
+        {
+          "word": "trait",
+          "part_of_speech": "noun",
+          "definition": "A single characteristic of a living thing.",
+          "def_num": 1
+        },
+        {
+          "word": "variations",
+          "part_of_speech": "noun",
+          "definition": "Differences among objects or organisms.",
+          "def_num": 1
+        }
+      ]
+    }
+  ]
+}
