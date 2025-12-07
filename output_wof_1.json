@@ -1,0 +1,180 @@
+{
+  "type": "check_cache",
+  "source_dataset": "wordly_wise_3000_book_3",
+  "reading_level": {
+    "system": "fp",
+    "level": "P"
+  },
+  "section": "10",
+  "theme": "wings_of_fire",
+  "model": "gpt-5-mini",
+  "seed": 1,
+  "worksheet_id": "a5-a182-2fa4",
+  "doc_key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1",
+  "doc_checksum": "ccda16168297a808",
+  "data": [
+    {
+      "word": "accessible",
+      "part_of_speech": "adjective",
+      "definition": "Able to be reached or easily approached.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|accessible|adjective|Able to be reached or easily approached.",
+      "checksum": "5ad7f53918738252",
+      "output": {
+        "sentence": "The mountain pass was icy, but the hidden cave was ### to the dragonets."
+      }
+    },
+    {
+      "word": "communicate",
+      "part_of_speech": "verb",
+      "definition": "To make known; to give or exchange information.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|communicate|verb|To make known; to give or exchange information.",
+      "checksum": "8c499caf6fd5098d",
+      "output": {
+        "sentence": "Starflight used soft calls and clicks to ### with the others at night."
+      }
+    },
+    {
+      "word": "communication",
+      "part_of_speech": "noun",
+      "definition": "The exchange of information.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|communication|noun|The exchange of information.",
+      "checksum": "7a427fb371e2e01a",
+      "output": {
+        "sentence": "Smoke on the ridge was the only ### between the tribes during the storm."
+      }
+    },
+    {
+      "word": "communities",
+      "part_of_speech": "noun",
+      "definition": "Places where people live, work, and play together.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|communities|noun|Places where people live, work, and play together.",
+      "checksum": "223b53e597d6a9d5",
+      "output": {
+        "sentence": "After the battle, small ### gathered to repair their homes."
+      }
+    },
+    {
+      "word": "convey",
+      "part_of_speech": "verb",
+      "definition": "To carry from one place to another; to transport.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|convey|verb|To carry from one place to another; to transport.",
+      "checksum": "ef67811403309771",
+      "output": {
+        "sentence": "A messenger dove and dropped a glowing shell to ### news across the sea."
+      }
+    },
+    {
+      "word": "decline",
+      "part_of_speech": "verb",
+      "definition": "To become less or weaker; to refuse politely.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|decline|verb|To become less or weaker; to refuse politely.",
+      "checksum": "cf6d445cc7c8ad33",
+      "output": {
+        "sentence": "As winter came, the river's water began to ### until only puddles remained."
+      }
+    },
+    {
+      "word": "idiom",
+      "part_of_speech": "noun",
+      "definition": "An expression whose meaning is different from the meaning of the individual words.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|idiom|noun|An expression whose meaning is different from the meaning of the individual words.",
+      "checksum": "f47754308e2da6f1",
+      "output": {
+        "sentence": "When the old dragon said 'fly with the wind' but meant 'go away,' it was an ###."
+      }
+    },
+    {
+      "word": "misinterpret",
+      "part_of_speech": "verb",
+      "definition": "To understand incorrectly.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|misinterpret|verb|To understand incorrectly.",
+      "checksum": "b544770cac3f2fd0",
+      "output": {
+        "sentence": "If a scout reads the scroll wrong, they might ### the enemy's plans."
+      }
+    },
+    {
+      "word": "rare",
+      "part_of_speech": "adjective",
+      "definition": "Not common; unusual.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|rare|adjective|Not common; unusual.",
+      "checksum": "3261488b6aa41035",
+      "output": {
+        "sentence": "A SandWing with bright blue scales was ### in the desert."
+      }
+    },
+    {
+      "word": "refer",
+      "part_of_speech": "verb",
+      "definition": "To direct attention to or speak about.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|refer|verb|To direct attention to or speak about.",
+      "checksum": "5035f07fb969d43c",
+      "output": {
+        "sentence": "When asked where to hide, Glory would ### to the jagged rocks on the map."
+      }
+    },
+    {
+      "word": "reference",
+      "part_of_speech": "noun",
+      "definition": "A mention of a source of information.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|reference|noun|A mention of a source of information.",
+      "checksum": "2ddb3d7a92e78008",
+      "output": {
+        "sentence": "Starflight kept a small ### book of laws and maps in his satchel."
+      }
+    },
+    {
+      "word": "slang",
+      "part_of_speech": "noun",
+      "definition": "Informal words or phrases that are more common in speech than in writing.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|slang|noun|Informal words or phrases that are more common in speech than in writing.",
+      "checksum": "c0f462030d664208",
+      "output": {
+        "sentence": "The NightWings used secret ### that were short, informal, and new."
+      }
+    },
+    {
+      "word": "visual",
+      "part_of_speech": "adjective",
+      "definition": "Having to do with sight or seeing.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|visual|adjective|Having to do with sight or seeing.",
+      "checksum": "aaac29bac74c96fd",
+      "output": {
+        "sentence": "The general made a ### chart with red marks to show safe routes."
+      }
+    },
+    {
+      "word": "visualize",
+      "part_of_speech": "verb",
+      "definition": "To form a mental picture of; to imagine.",
+      "def_num": 1,
+      "key": "wordly_wise_3000_book_3|fp-P|10|wings_of_fire|gpt-5-mini|1|visualize|verb|To form a mental picture of; to imagine.",
+      "checksum": "5db6a2b339d6586b",
+      "output": {
+        "sentence": "Before the raid, Clay closed his eyes to ### the safest path home."
+      }
+    }
+  ],
+  "output": {
+    "subtitle": "Dragonet communication connects rare communities across war-torn Pyrrhia"
+  },
+  "presentation_metadata": {
+    "header": "Avery's WoF Vocab - Section {section}",
+    "footer": "Page {current_page} of {total_pages}",
+    "answer_key_footer": "Fountas & Pinnell Level {reading_level}",
+    "section": 10
+  }
+}

@@ -126,7 +126,7 @@ def load_theme_content(request: Dict[str, Any], theme_dir: Optional[str]) -> Opt
             "Input JSON specifies a 'theme', but no --theme-dir was provided."
         )
 
-    theme_path = os.path.join(theme_dir, f"{theme_name}.json")
+    theme_path = os.path.join(theme_dir, f"{theme_name}.txt")
     return read_file_text(theme_path)
 
 
