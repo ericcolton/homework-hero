@@ -46,5 +46,9 @@ def generate():
     print(f"Generating with: {data}")
     return jsonify({"status": "success", "message": "Worksheet generation started..."})
 
+@app.route('/about')
+def about():
+    return render_template('about.html', config=app_config)
+
 if __name__ == '__main__':
     app.run(debug=True)

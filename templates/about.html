@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - KPop Vocab Hunters</title>
+    <style>
+        /* CORE VARIABLES (Default Theme) */
+        :root {
+            --bg-color: #0a0a12;
+            --card-bg: #161625;
+            --text-color: #ffffff;
+            --accent-primary: #ff007f;
+            --accent-secondary: #00f3ff;
+            --border-glow: 0 0 15px rgba(255, 0, 127, 0.6);
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --btn-gradient: linear-gradient(90deg, #ff007f, #6600ff);
+            --header-font-weight: 800;
+            --input-bg: #222233;
+        }
+
+        /* WINGS OF FIRE THEME */
+        body.theme-wof {
+            --bg-color: #2b1d14;
+            --card-bg: #3e2b1f;
+            --text-color: #f0e6d2;
+            --accent-primary: #d4af37;
+            --accent-secondary: #c23b22;
+            --border-glow: 0 0 10px rgba(212, 175, 55, 0.3);
+            --font-main: 'Georgia', serif;
+            --btn-gradient: linear-gradient(180deg, #8b0000, #b22222);
+            --header-font-weight: 600;
+            --input-bg: #553e32;
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 600px; padding: 2rem; }
+
+        header { text-align: center; margin-bottom: 2.5rem; }
+
+        h1 {
+            font-size: 3rem; margin: 0;
+            text-transform: uppercase; letter-spacing: 2px;
+            font-weight: var(--header-font-weight);
+            background: var(--btn-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 4px 15px rgba(0,0,0,0.5);
+        }
+
+        p.subtitle { font-size: 1rem; opacity: 0.8; margin-top: 0.5rem; letter-spacing: 1px; }
+
+        .control-panel {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative; overflow: hidden;
+            text-align: center;
+        }
+
+        .control-panel::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: var(--btn-gradient);
+            box-shadow: var(--border-glow);
+        }
+
+        .about-text {
+            font-size: 1rem;
+            letter-spacing: 0;
+            text-transform: none;
+            line-height: 1.6;
+        }
+        .about-text a {
+            color: #bff7ff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .about-text a:hover { text-decoration: underline; }
+
+        .footer { margin-top: 2rem; text-align: center; font-size: 0.8rem; opacity: 0.5; }
+        .footer a {
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="{{ config.themes[0].css_class }}">
+
+<div class="container">
+    <header>
+        <h1 id="ui-title">{{ config.themes[0].ui_title }}</h1>
+        <p class="subtitle" id="ui-subtitle">{{ config.themes[0].ui_subtitle }}</p>
+    </header>
+
+    <div class="control-panel">
+        <div class="about-text">
+            I made this site to help students learn vocabulary in a fun way.
+            <a href="mailto:eric@kpopvocabhunters.com">eric@kpopvocabhunters.com</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="/">Back</a>
+    </div>
+</div>
+
+</body>
+</html>
