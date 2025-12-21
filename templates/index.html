@@ -117,6 +117,50 @@
         .generate-btn:hover { transform: translateY(-2px); filter: brightness(1.2); }
 
         .footer { margin-top: 2rem; text-align: center; font-size: 0.8rem; opacity: 0.5; }
+
+        .advanced-toggle {
+            grid-column: span 2;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            background-color: rgba(0,0,0,0.15);
+            padding: 0.75rem 1rem;
+        }
+
+        .advanced-toggle summary {
+            list-style: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--accent-secondary);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .advanced-toggle summary::-webkit-details-marker { display: none; }
+
+        .advanced-toggle summary::after {
+            content: ">";
+            font-size: 0.9rem;
+            color: var(--accent-primary);
+            transform: rotate(0deg);
+            transition: transform 0.2s ease;
+        }
+
+        .advanced-toggle[open] summary::after { transform: rotate(90deg); }
+
+        .advanced-content { margin-top: 1rem; }
+        .advanced-content label { margin-top: 0.9rem; }
+        .advanced-content label:first-child { margin-top: 0; }
+        .advanced-content input { margin-top: 0.35rem; }
+
+        .advanced-fieldset {
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 0.75rem 1rem 1rem;
+            background-color: rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body class="{{ config.themes[0].css_class }}">
@@ -173,16 +217,30 @@
                 </div>
             </div>
             
-            <div class="full-width">
-                <label for="model">AI Model</label>
-                <div class="select-wrapper">
-                    <select id="model" name="model">
-                        {% for model in config.models %}
-                        <option value="{{ model.id }}">{{ model.name }}</option>
-                        {% endfor %}
-                    </select>
+            <details class="advanced-toggle">
+                <summary>Advanced</summary>
+                <div class="advanced-content">
+                    <div class="advanced-fieldset">
+                        <label for="header_text">Header Text</label>
+                        <input id="header_text" name="header_text" type="text" placeholder="{theme_name} - Section {section}">
+
+                        <label for="footer_text">Footer Text</label>
+                        <input id="footer_text" name="footer_text" type="text" placeholder="Page {current_page} of {total_pages}">
+
+                        <label for="answer_key_footer">Answer Key Footer</label>
+                        <input id="answer_key_footer" name="answer_key_footer" type="text" placeholder="Fountas & Pinnell Level {reading_level}">
+                    </div>
+
+                    <label for="model">AI Model</label>
+                    <div class="select-wrapper">
+                        <select id="model" name="model">
+                            {% for model in config.models %}
+                            <option value="{{ model.id }}">{{ model.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-            </div>
+            </details>
 
             <button type="submit" class="generate-btn">Generate Worksheet</button>
 
