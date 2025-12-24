@@ -1,10 +1,18 @@
 [
     {
         "id": 1,
-        "short_name": "kpop_demon_hunters"
+        "short_name": "kpop_demon_hunters",
+        "name": "KPop Demon Hunters",
+        "css_class": "",
+        "ui_title": "KPop Vocab Hunters",
+        "ui_subtitle": "Hunt Vocabulary. Defeat Demons."
     },
     {
         "id": 2,
-        "short_name": "wings_of_fire"
+        "short_name": "wings_of_fire",
+        "name": "Wings of Fire",
+        "css_class": "theme-wof",
+        "ui_title": "Dragon Vocab Scrolls",
+        "ui_subtitle": "Fly High. Burn Bright. Learn Words."
     }
 ]

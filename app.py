@@ -39,25 +39,50 @@ def load_source_datasets():
         data_sources.append({"id": short_name, "name": name})
     return data_sources
 
+def load_themes():
+    config_path = os.environ.get("HOMEWORK_HERO_CONFIG_PATH")
+    if not config_path:
+        raise RuntimeError("HOMEWORK_HERO_CONFIG_PATH is not set.")
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        raise RuntimeError(f"Failed to load HOMEWORK_HERO_CONFIG_PATH='{config_path}': {e}") from e
+
+    reference_data_path = config.get("reference_data")
+    if not reference_data_path:
+        raise RuntimeError(
+            f"Config at HOMEWORK_HERO_CONFIG_PATH='{config_path}' missing 'reference_data'."
+        )
+
+    themes_path = Path(reference_data_path, "themes.json")
+    with open(themes_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if isinstance(data, dict):
+        data = [data]
+    if not isinstance(data, list):
+        raise ValueError("Reference_Data/themes.json must be a list or object.")
+    themes = []
+    for item in data:
+        short_name = item.get("short_name")
+        if not short_name:
+            continue
+        display_name = item.get("name") or short_name.replace("_", " ").title()
+        themes.append(
+            {
+                "id": short_name,
+                "name": display_name,
+                "css_class": item.get("css_class", ""),
+                "ui_title": item.get("ui_title") or display_name,
+                "ui_subtitle": item.get("ui_subtitle", ""),
+            }
+        )
+    return themes
+
 # --- CONFIGURATION / PLUGINS ---
 app_config = {
     "data_sources": load_source_datasets(),
-    "themes": [
-        {
-            "id": "kpop",
-            "name": "KPop Demon Hunters",
-            "css_class": "", # Default theme has no extra class
-            "ui_title": "KPop Vocab Hunters",
-            "ui_subtitle": "Hunt Vocabulary. Defeat Demons."
-        },
-        {
-            "id": "wof",
-            "name": "Wings of Fire",
-            "css_class": "theme-wof",
-            "ui_title": "Dragon Vocab Scrolls",
-            "ui_subtitle": "Fly High. Burn Bright. Learn Words."
-        }
-    ],
+    "themes": load_themes(),
     "models": [
         {"id": "gpt-5-mini", "name": "gpt-5-mini"},
         {"id": "gpt-4o", "name": "gpt-4o (High Cost)"},
