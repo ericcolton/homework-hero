@@ -36,6 +36,39 @@ def get_source_datasets_dir():
         )
     return Path(source_datasets_dir)
 
+def get_responses_datastore_path():
+    config, config_path = get_global_config()
+    responses_datastore = config.get("responses_datastore")
+    if not responses_datastore:
+        raise RuntimeError(
+            f"Config at HOMEWORK_HERO_CONFIG_PATH='{config_path}' missing 'responses_datastore'."
+        )
+    return Path(responses_datastore)
+
+def build_reading_level_segment(reading_level):
+    # assume F&P
+    return f"fp_{reading_level}"
+
+def list_cached_episodes(source_dataset, theme, reading_level, model, section):
+    datastore_root = get_responses_datastore_path()
+    reading_level_segment = build_reading_level_segment(reading_level)
+    cache_dir = (
+        datastore_root
+        / str(source_dataset)
+        / reading_level_segment
+        / str(section)
+        / str(theme)
+        / str(model)
+    )
+
+    if not cache_dir.is_dir():
+        return []
+    episodes = []
+    for path in cache_dir.iterdir():
+        if path.is_file() and path.suffix == ".json" and path.stem.isdigit():
+            episodes.append(int(path.stem))
+    return sorted(episodes)
+
 def load_source_datasets():
     reference_data_path = get_reference_data_path()
     source_datasets_path = reference_data_path / "source_datasets.json"
@@ -50,8 +83,8 @@ def load_source_datasets():
         key_name = item.get("key_name")
         if not key_name:
             continue
-        name = item.get("name") or key_name.replace("_", " ").title()
-        data_sources.append({"id": key_name, "name": name})
+        title = item.get("title") or key_name.replace("_", " ").title()
+        data_sources.append({"id": key_name, "title": title})
     return data_sources
 
 def load_themes():
@@ -68,13 +101,13 @@ def load_themes():
         key_name = item.get("key_name")
         if not key_name:
             continue
-        display_name = item.get("name") or key_name.replace("_", " ").title()
+        display_title = item.get("title") or key_name.replace("_", " ").title()
         themes.append(
             {
                 "id": key_name,
-                "name": display_name,
+                "title": display_title,
                 "css_class": item.get("css_class", ""),
-                "ui_title": item.get("ui_title") or display_name,
+                "ui_title": item.get("ui_title") or display_title,
                 "ui_subtitle": item.get("ui_subtitle", ""),
             }
         )
@@ -95,12 +128,12 @@ def load_models():
         key_name = item.get("key_name")
         if not key_name:
             continue
-        display_name = item.get("name") or key_name
+        display_title = item.get("title") or key_name
         is_default = bool(item.get("is_default")) and not default_set
         if is_default:
             default_set = True
         models.append(
-            {"id": key_name, "name": display_name, "is_default": is_default}
+            {"id": key_name, "title": display_title, "is_default": is_default}
         )
     if models and not default_set:
         models[0]["is_default"] = True
@@ -154,6 +187,27 @@ def sections(source_dataset):
     except Exception as exc:
         return jsonify({"error": str(exc)}), 400
     return jsonify({"sections": sections})
+
+@app.route('/episodes')
+def episodes():
+    source_dataset = request.args.get("source_dataset")
+    theme = request.args.get("theme")
+    reading_level = request.args.get("reading_level")
+    model = request.args.get("model")
+    section = request.args.get("section")
+    if not all([source_dataset, theme, reading_level, model, section]):
+        return jsonify({"episodes": []})
+    try:
+        episodes_list = list_cached_episodes(
+            source_dataset=source_dataset,
+            theme=theme,
+            reading_level=reading_level,
+            model=model,
+            section=section,
+        )
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 400
+    return jsonify({"episodes": episodes_list})
 
 @app.route('/about')
 def about():

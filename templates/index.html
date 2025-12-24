@@ -180,6 +180,17 @@
             padding: 0.75rem 1rem 1rem;
             background-color: rgba(0,0,0,0.2);
         }
+
+        .episode-list {
+            margin-top: 1rem;
+        }
+        .episode-list textarea {
+            width: 100%;
+            min-height: 5rem;
+            max-height: 10rem;
+            resize: vertical;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body class="{{ config.themes[0].css_class }}">
@@ -197,7 +208,7 @@
                 <div class="select-wrapper">
                     <select id="theme" name="theme" onchange="changeTheme()">
                         {% for theme in config.themes %}
-                        <option value="{{ theme.id }}">{{ theme.name }}</option>
+                        <option value="{{ theme.id }}">{{ theme.title }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -208,7 +219,7 @@
                 <div class="select-wrapper">
                     <select id="datasource" name="datasource" onchange="changeSourceDataset()">
                         {% for source in config.data_sources %}
-                        <option value="{{ source.id }}">{{ source.name }}</option>
+                        <option value="{{ source.id }}">{{ source.title }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -272,12 +283,17 @@
                     <div class="select-wrapper">
                         <select id="model" name="model">
                             {% for model in config.models %}
-                            <option value="{{ model.id }}" {% if model.is_default %}selected{% endif %}>{{ model.name }}</option>
+                            <option value="{{ model.id }}" {% if model.is_default %}selected{% endif %}>{{ model.title }}</option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
             </details>
+
+            <div id="episode-list-container" class="episode-list" hidden>
+                <label for="episode_list">Available Episodes</label>
+                <textarea id="episode_list" name="episode_list" rows="4" readonly></textarea>
+            </div>
 
             <button type="submit" class="generate-btn">Generate Worksheet</button>
 
@@ -313,6 +329,46 @@
         document.body.className = currentTheme.css_class;
     }
 
+    async function updateEpisodes() {
+        const container = document.getElementById('episode-list-container');
+        const textarea = document.getElementById('episode_list');
+        if (!container || !textarea) {
+            return;
+        }
+        const sourceDataset = document.getElementById('datasource').value;
+        const theme = document.getElementById('theme').value;
+        const readingLevel = document.getElementById('level').value;
+        const model = document.getElementById('model').value;
+        const section = document.getElementById('section').value;
+
+        const params = new URLSearchParams({
+            source_dataset: sourceDataset,
+            theme: theme,
+            reading_level: readingLevel,
+            model: model,
+            section: section
+        });
+
+        try {
+            const response = await fetch(`/episodes?${params.toString()}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch episodes.');
+            }
+            const payload = await response.json();
+            const episodes = payload.episodes || [];
+            if (!episodes.length) {
+                container.hidden = true;
+                textarea.value = '';
+                return;
+            }
+            container.hidden = false;
+            textarea.value = episodes.join('\n');
+        } catch (err) {
+            container.hidden = true;
+            textarea.value = '';
+        }
+    }
+
     async function changeSourceDataset() {
         const selectedId = document.getElementById('datasource').value;
         try {
@@ -332,10 +388,15 @@
         } catch (err) {
             // Keep existing sections if the request fails.
         }
+        updateEpisodes();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         changeSourceDataset();
+        document.getElementById('theme').addEventListener('change', updateEpisodes);
+        document.getElementById('level').addEventListener('change', updateEpisodes);
+        document.getElementById('section').addEventListener('change', updateEpisodes);
+        document.getElementById('model').addEventListener('change', updateEpisodes);
     });
 </script>
 

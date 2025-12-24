@@ -2,7 +2,7 @@
     {
         "id": 1,
         "key_name": "kpop_demon_hunters",
-        "name": "KPop Demon Hunters",
+        "title": "KPop Demon Hunters",
         "css_class": "",
         "ui_title": "KPop Vocab Hunters",
         "ui_subtitle": "Hunt Vocabulary. Defeat Demons."
@@ -10,7 +10,7 @@
     {
         "id": 2,
         "key_name": "wings_of_fire",
-        "name": "Wings of Fire",
+        "title": "Wings of Fire",
         "css_class": "theme-wof",
         "ui_title": "Dragon Vocab Scrolls",
         "ui_subtitle": "Fly High. Burn Bright. Learn Words."

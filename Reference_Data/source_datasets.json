@@ -2,13 +2,13 @@
     {
         "id": 1,
         "key_name": "wordly_wise_3000_book_3",
-        "name": "Wordly Wise 3000 Book 3",
+        "title": "Wordly Wise 3000 Book 3",
         "abbr": "WW3000 Bk3"
     },
     {
         "id": 2,
         "key_name": "fot_animal_adaptation",
-        "name": "FOT: Animal Adaptation",
+        "title": "FOT: Animal Adaptation",
         "abbr": "FOT Animals"
     }
 ]
