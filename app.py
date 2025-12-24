@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-def load_source_datasets():
+def get_reference_data_path():
     config_path = os.environ.get("HOMEWORK_HERO_CONFIG_PATH")
     if not config_path:
         raise RuntimeError("HOMEWORK_HERO_CONFIG_PATH is not set.")
@@ -16,14 +16,17 @@ def load_source_datasets():
             config = json.load(f)
     except (OSError, json.JSONDecodeError) as e:
         raise RuntimeError(f"Failed to load HOMEWORK_HERO_CONFIG_PATH='{config_path}': {e}") from e
-
+    
     reference_data_path = config.get("reference_data")
     if not reference_data_path:
         raise RuntimeError(
             f"Config at HOMEWORK_HERO_CONFIG_PATH='{config_path}' missing 'reference_data'."
         )
+    return Path(reference_data_path)
 
-    source_datasets_path = Path(reference_data_path, "source_datasets.json")
+def load_source_datasets():
+    reference_data_path = get_reference_data_path()
+    source_datasets_path = reference_data_path / "source_datasets.json"
     with open(source_datasets_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     if isinstance(data, dict):
@@ -40,22 +43,8 @@ def load_source_datasets():
     return data_sources
 
 def load_themes():
-    config_path = os.environ.get("HOMEWORK_HERO_CONFIG_PATH")
-    if not config_path:
-        raise RuntimeError("HOMEWORK_HERO_CONFIG_PATH is not set.")
-    try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            config = json.load(f)
-    except (OSError, json.JSONDecodeError) as e:
-        raise RuntimeError(f"Failed to load HOMEWORK_HERO_CONFIG_PATH='{config_path}': {e}") from e
-
-    reference_data_path = config.get("reference_data")
-    if not reference_data_path:
-        raise RuntimeError(
-            f"Config at HOMEWORK_HERO_CONFIG_PATH='{config_path}' missing 'reference_data'."
-        )
-
-    themes_path = Path(reference_data_path, "themes.json")
+    reference_data_path = get_reference_data_path()
+    themes_path = reference_data_path / "themes.json"
     with open(themes_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     if isinstance(data, dict):
