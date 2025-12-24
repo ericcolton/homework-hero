@@ -1,15 +1,47 @@
 
+import json
+import os
+from pathlib import Path
+
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
+def load_source_datasets():
+    config_path = os.environ.get("HOMEWORK_HERO_CONFIG_PATH")
+    if not config_path:
+        raise RuntimeError("HOMEWORK_HERO_CONFIG_PATH is not set.")
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        raise RuntimeError(f"Failed to load HOMEWORK_HERO_CONFIG_PATH='{config_path}': {e}") from e
+
+    reference_data_path = config.get("reference_data")
+    if not reference_data_path:
+        raise RuntimeError(
+            f"Config at HOMEWORK_HERO_CONFIG_PATH='{config_path}' missing 'reference_data'."
+        )
+
+    source_datasets_path = Path(reference_data_path, "source_datasets.json")
+    with open(source_datasets_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if isinstance(data, dict):
+        data = [data]
+    if not isinstance(data, list):
+        raise ValueError("Reference_Data/source_datasets.json must be a list or object.")
+    data_sources = []
+    for item in data:
+        short_name = item.get("short_name")
+        if not short_name:
+            continue
+        name = item.get("name") or short_name.replace("_", " ").title()
+        data_sources.append({"id": short_name, "name": name})
+    return data_sources
+
 # --- CONFIGURATION / PLUGINS ---
-# In a real app, these could be loaded from a database or JSON file.
 app_config = {
-    "data_sources": [
-        {"id": "ww3000_bk3", "name": "Wordly Wise 3000 Book 3"},
-        {"id": "ww3000_bk4", "name": "Wordly Wise 3000 Book 4 (Coming Soon)"}, # Example of adding another
-    ],
+    "data_sources": load_source_datasets(),
     "themes": [
         {
             "id": "kpop",
