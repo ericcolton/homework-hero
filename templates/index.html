@@ -311,12 +311,12 @@
                                 <div><span class="legend-key">{worksheet_id}</span>: Unique worksheet identifier</div>
                                 <div><span class="legend-key">{current_page}</span>: Page number within worksheet</div>
                                 <div><span class="legend-key">{total_pages}</span>: Total worksheet pages</div>
-                                <div><span class="legend-key">{model}</span>: AI model identifier</div>
+                                <div><span class="legend-key">{model}</span>: Model identifier</div>
                             </div>
                         </details>
                     </div>
 
-                    <label for="model">AI Model</label>
+                    <label for="model">Model</label>
                     <div class="select-wrapper">
                         <select id="model" name="model">
                             {% for model in config.models %}
@@ -334,7 +334,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="generate-btn">Generate Worksheet</button>
+            <button id="generate-btn" type="submit" class="generate-btn">Generate Worksheet</button>
 
         </form>
     </div>
@@ -396,6 +396,14 @@
         }
     }
 
+    function updateGenerateButton(hasEpisodes) {
+        const button = document.getElementById('generate-btn');
+        if (!button) {
+            return;
+        }
+        button.textContent = hasEpisodes ? 'Generate New Worksheet' : 'Generate Worksheet';
+    }
+
     async function updateEpisodes() {
         const container = document.getElementById('episode-list-container');
         const list = document.getElementById('episode_list');
@@ -426,6 +434,7 @@
             if (!episodes.length) {
                 container.hidden = true;
                 list.innerHTML = '';
+                updateGenerateButton(false);
                 return;
             }
             container.hidden = false;
@@ -448,9 +457,11 @@
                 entry.appendChild(content);
                 list.appendChild(entry);
             });
+            updateGenerateButton(true);
         } catch (err) {
             container.hidden = true;
             list.innerHTML = '';
+            updateGenerateButton(false);
         }
     }
 
