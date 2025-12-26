@@ -291,7 +291,7 @@
             </details>
 
             <div id="episode-list-container" class="episode-list" hidden>
-                <label for="episode_list">Available Episodes</label>
+                <label for="episode_list">Available Worksheets</label>
                 <textarea id="episode_list" name="episode_list" rows="4" readonly></textarea>
             </div>
 
@@ -312,6 +312,7 @@
         "{{ theme.id }}": {
             "title": "{{ theme.ui_title }}",
             "subtitle": "{{ theme.ui_subtitle }}",
+
             "css_class": "{{ theme.css_class }}"
         },
         {% endfor %}
@@ -362,7 +363,14 @@
                 return;
             }
             container.hidden = false;
-            textarea.value = episodes.join('\n');
+            const formattedEpisodes = episodes.map((episode) => {
+                if (episode && typeof episode === 'object') {
+                    const subtitle = episode.subtitle ? ` - ${episode.subtitle}` : '';
+                    return `Episode ${episode.episode}${subtitle}`;
+                }
+                return String(episode);
+            });
+            textarea.value = formattedEpisodes.join('\n');
         } catch (err) {
             container.hidden = true;
             textarea.value = '';

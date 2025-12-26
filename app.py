@@ -66,8 +66,19 @@ def list_cached_episodes(source_dataset, theme, reading_level, model, section):
     episodes = []
     for path in cache_dir.iterdir():
         if path.is_file() and path.suffix == ".json" and path.stem.isdigit():
-            episodes.append(int(path.stem))
-    return sorted(episodes)
+            subtitle = ""
+            try:
+                with path.open("r", encoding="utf-8") as f:
+                    payload = json.load(f)
+                subtitle = (
+                    (payload.get("output") or {}).get("subtitle")
+                    or (payload.get("presentation_metadata") or {}).get("subtitle")
+                    or ""
+                )
+            except (OSError, json.JSONDecodeError):
+                subtitle = ""
+            episodes.append({"episode": int(path.stem), "subtitle": subtitle})
+    return sorted(episodes, key=lambda item: item["episode"])
 
 def load_source_datasets():
     reference_data_path = get_reference_data_path()
