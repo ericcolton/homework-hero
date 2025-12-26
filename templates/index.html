@@ -278,7 +278,7 @@
                 <div class="select-wrapper">
                     <select id="level" name="level">
                         {% for letter in config.levels %}
-                        <option value="{{ letter }}">{{ letter }}</option>
+                        <option value="{{ letter }}" {% if letter == "P" %}selected{% endif %}>{{ letter }}</option>
                         {% endfor %}
                     </select>
                 </div>
