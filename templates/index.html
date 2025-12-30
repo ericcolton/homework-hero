@@ -404,6 +404,29 @@
         button.textContent = hasEpisodes ? 'Generate New Episode' : 'Generate Episode';
     }
 
+    function handleEpisodeTap(item) {
+        if (!item) {
+            return;
+        }
+        const payload = {
+            episode: item.dataset.episode || null,
+            subtitle: item.dataset.subtitle || "",
+            source_dataset: document.getElementById('datasource').value,
+            theme: document.getElementById('theme').value,
+            reading_level: document.getElementById('level').value,
+            model: document.getElementById('model').value,
+            section: document.getElementById('section').value
+        };
+        fetch('/fetch_episode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            keepalive: true
+        }).catch(() => {
+            // Logging failures should not affect UX.
+        });
+    }
+
     async function updateEpisodes() {
         const container = document.getElementById('episode-list-container');
         const list = document.getElementById('episode_list');
@@ -443,15 +466,20 @@
                 const entry = document.createElement('li');
                 entry.className = 'episode-list-item';
 
+                const episodeNumber = episode.episode ?? episode;
+                const episodeSubtitle = (episode && typeof episode === 'object' && episode.subtitle) ? episode.subtitle : '';
+                entry.dataset.episode = `${episodeNumber}`;
+                entry.dataset.subtitle = episodeSubtitle;
+
                 const pill = document.createElement('span');
                 pill.className = 'episode-pill';
-                pill.textContent = `#${episode.episode ?? episode}`;
+                pill.textContent = `#${episodeNumber}`;
                 entry.appendChild(pill);
 
                 const content = document.createElement('div');
                 content.className = 'episode-title';
-                if (episode && typeof episode === 'object' && episode.subtitle) {
-                    content.textContent = episode.subtitle;
+                if (episodeSubtitle) {
+                    content.textContent = episodeSubtitle;
                 }
 
                 entry.appendChild(content);
@@ -493,6 +521,7 @@
         const sectionSelect = document.getElementById('section');
         const levelSelect = document.getElementById('level');
         const modelSelect = document.getElementById('model');
+        const episodeList = document.getElementById('episode_list');
 
         const saved = loadPreferences();
         if (saved) {
@@ -539,6 +568,15 @@
             savePreferences();
             updateEpisodes();
         });
+
+        if (episodeList) {
+            episodeList.addEventListener('click', (event) => {
+                const item = event.target.closest('.episode-list-item');
+                if (item && episodeList.contains(item)) {
+                    handleEpisodeTap(item);
+                }
+            });
+        }
     });
 </script>
 

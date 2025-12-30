@@ -220,6 +220,12 @@ def episodes():
         return jsonify({"error": str(exc)}), 400
     return jsonify({"episodes": episodes_list})
 
+@app.route('/fetch_episode', methods=['POST'])
+def fetch_episode():
+    payload = request.get_json(silent=True) or {}
+    app.logger.info("episode_tap %s", payload)
+    return jsonify({"status": "ok"})
+
 @app.route('/about')
 def about():
     return render_template('about.html', config=app_config)
