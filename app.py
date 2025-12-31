@@ -13,6 +13,7 @@ if str(scripts_dir) not in sys.path:
     sys.path.append(str(scripts_dir))
 
 from phase2 import run_with_json, Phase2Error
+from phase5 import run_with_json as run_phase5_with_json
 
 def get_global_config():
     config_path = os.environ.get("HOMEWORK_HERO_CONFIG_PATH")
@@ -246,7 +247,13 @@ def fetch_episode():
         return jsonify({"error": str(exc)}), 400
     except json.JSONDecodeError as exc:
         return jsonify({"error": f"Failed to parse phase2 response: {exc}"}), 500
-    return jsonify(response_payload)
+
+    try:
+        pdf_bytes = run_phase5_with_json(response_json)
+    except ValueError as exc:
+        return jsonify({"error": f"Failed to build PDF: {exc}"}), 500
+
+    return pdf_bytes
 
 @app.route('/about')
 def about():

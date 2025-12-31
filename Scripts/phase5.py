@@ -469,7 +469,8 @@ def build_pdf(doc_root, output_stream):
     
     
     presentation_variables = {
-        "section": doc_root["presentation_metadata"]["section"],
+        # "section": doc_root["presentation_metadata"]["section"],
+        "section": doc_root["section"],
         "reading_system": doc_root["reading_level"]["system"],
         "reading_level": doc_root["reading_level"]["level"],
         "model": doc_root["model"],
@@ -524,16 +525,36 @@ def main():
         print(f"Error: invalid JSON from stdin: {e}", file=sys.stderr)
         sys.exit(1)
 
-    if not isinstance(doc_root, dict) or not doc_root:
-        print("Error: JSON must be a non-empty dictionary.", file=sys.stderr)
+    try:
+        pdf_bytes = run_from_json(doc_root)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
     # Basic schema check
     # required = {"title", "seed", "sections"}
     # TODO: add root schema checking
-    
-    build_pdf(doc_root, sys.stdout.buffer)
+
+    sys.stdout.buffer.write(pdf_bytes)
+
+
+def run_from_json(doc_root):
+    if isinstance(doc_root, str):
+        try:
+            doc_root = json.loads(doc_root)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"invalid JSON string: {e}") from e
+
+    if not isinstance(doc_root, dict) or not doc_root:
+        raise ValueError("JSON must be a non-empty dictionary.")
+
+    buffer = io.BytesIO()
+    build_pdf(doc_root, buffer)
+    return buffer.getvalue()
+
+
+def run_with_json(doc_root):
+    return run_from_json(doc_root)
 
 if __name__ == "__main__":
     main()
-

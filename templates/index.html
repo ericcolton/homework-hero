@@ -404,10 +404,19 @@
         button.textContent = hasEpisodes ? 'Generate New Episode' : 'Generate Episode';
     }
 
-    function handleEpisodeTap(item) {
+    async function handleEpisodeTap(item) {
         if (!item) {
             return;
         }
+        const headerInput = document.getElementById('header_text');
+        const footerInput = document.getElementById('footer_text');
+        const answerKeyFooterInput = document.getElementById('answer_key_footer');
+        const headerValue = (headerInput && headerInput.value.trim()) || (headerInput && headerInput.placeholder) || '';
+        const footerValue = (footerInput && footerInput.value.trim()) || (footerInput && footerInput.placeholder) || '';
+        const answerKeyFooterValue = (answerKeyFooterInput && answerKeyFooterInput.value.trim())
+            || (answerKeyFooterInput && answerKeyFooterInput.placeholder)
+            || '';
+
         const payload = {
             episode: item.dataset.episode || null,
             subtitle: item.dataset.subtitle || "",
@@ -415,16 +424,27 @@
             theme: document.getElementById('theme').value,
             reading_level: document.getElementById('level').value,
             model: document.getElementById('model').value,
-            section: document.getElementById('section').value
+            section: document.getElementById('section').value,
+            header: headerValue,
+            footer: footerValue,
+            answer_key_footer: answerKeyFooterValue
         };
-        fetch('/fetch_episode', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-            keepalive: true
-        }).catch(() => {
-            // Logging failures should not affect UX.
-        });
+        try {
+            const response = await fetch('/fetch_episode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                return;
+            }
+            const pdfBuffer = await response.arrayBuffer();
+            const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, '_blank', 'noopener');
+        } catch (err) {
+            // Fetch failures should not affect UX.
+        }
     }
 
     async function updateEpisodes() {
