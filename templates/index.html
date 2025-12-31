@@ -50,6 +50,9 @@
             box-shadow: var(--border-glow);
         }
 
+        .main-layout { display: block; }
+        .panel-form { width: 100%; }
+
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
         .full-width { grid-column: span 2; }
 
@@ -228,6 +231,32 @@
             opacity: 0.7;
             margin-top: 0.2rem;
         }
+        .preview-panel {
+            margin-top: 1.5rem;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(0,0,0,0.2);
+        }
+        #episode-pdf-frame {
+            width: 100%;
+            height: 70vh;
+            border: 0;
+            display: block;
+            background: #fff;
+        }
+
+        @media (min-width: 900px) {
+            .container.has-preview { max-width: 1100px; }
+            .container.has-preview .main-layout {
+                display: flex;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+            .container.has-preview .control-panel { flex: 0 0 520px; }
+            .container.has-preview .preview-panel { flex: 1; margin-top: 0; }
+            #episode-pdf-frame { height: 75vh; }
+        }
     </style>
 </head>
 <body class="{{ config.themes[0].css_class }}">
@@ -238,105 +267,111 @@
         <p class="subtitle" id="ui-subtitle">{{ config.themes[0].ui_subtitle }}</p>
     </header>
 
-    <div class="control-panel">
-        <form class="grid" action="/generate" method="POST">
-            <div class="full-width">
-                <label for="theme">Theme</label>
-                <div class="select-wrapper">
-                    <select id="theme" name="theme" onchange="changeTheme()">
-                        {% for theme in config.themes %}
-                        <option value="{{ theme.id }}">{{ theme.title }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            
-            <div class="full-width">
-                <label for="datasource">Source</label>
-                <div class="select-wrapper">
-                    <select id="datasource" name="datasource" onchange="changeSourceDataset()">
-                        {% for source in config.data_sources %}
-                        <option value="{{ source.id }}">{{ source.title }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label for="section">Section</label>
-                <div class="select-wrapper">
-                    <select id="section" name="section">
-                        {% for num in config.sections %}
-                        <option value="{{ num }}">{{ num }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label for="level">Reading Level</label>
-                <div class="select-wrapper">
-                    <select id="level" name="level">
-                        {% for letter in config.levels %}
-                        <option value="{{ letter }}" {% if letter == "P" %}selected{% endif %}>{{ letter }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            
-            <details class="advanced-toggle">
-                <summary>Advanced</summary>
-                <div class="advanced-content">
-                    <div class="advanced-fieldset">
-                        <label for="header_text">Header Text</label>
-                        <input id="header_text" name="header_text" type="text" placeholder="{theme_name} - Section {section}">
-
-                        <label for="footer_text">Footer Text</label>
-                        <input id="footer_text" name="footer_text" type="text" placeholder="Page {current_page} of {total_pages}">
-
-                        <label for="answer_key_footer">Answer Key Footer</label>
-                        <input id="answer_key_footer" name="answer_key_footer" type="text" placeholder="Fountas & Pinnell Level {reading_level}">
-                        
-                        <details class="advanced-legend">
-                            <summary>Label Variables</summary>
-                            <div class="legend-body" aria-label="Text field variable legend">
-                                <div class="legend-note">Use any of these variables within the above labels:</div>
-                                <div><span class="legend-key">{source}</span>: Full data-source title</div>
-                                <div><span class="legend-key">{source_abbr}</span>: Abbreviated data-source title</div>
-                                <div><span class="legend-key">{theme}</span>: Full theme title</div>
-                                <div><span class="legend-key">{theme_abbr}</span>: Abbreviated theme title</div>
-                                <div><span class="legend-key">{section}</span>: Section # within the data source</div>
-                                <div><span class="legend-key">{episode}</span>: Episode #</div>
-                                <div><span class="legend-key">{reading_level}</span>: F&amp;P reading level</div>
-                                <div><span class="legend-key">{worksheet_id}</span>: Unique worksheet identifier</div>
-                                <div><span class="legend-key">{current_page}</span>: Page number within worksheet</div>
-                                <div><span class="legend-key">{total_pages}</span>: Total worksheet pages</div>
-                                <div><span class="legend-key">{model}</span>: Model identifier</div>
-                            </div>
-                        </details>
-                    </div>
-
-                    <label for="model">Model</label>
+    <div class="main-layout">
+        <div class="control-panel">
+            <form class="grid panel-form" action="/generate" method="POST">
+                <div class="full-width">
+                    <label for="theme">Theme</label>
                     <div class="select-wrapper">
-                        <select id="model" name="model">
-                            {% for model in config.models %}
-                            <option value="{{ model.id }}" {% if model.is_default %}selected{% endif %}>{{ model.title }}</option>
+                        <select id="theme" name="theme" onchange="changeTheme()">
+                            {% for theme in config.themes %}
+                            <option value="{{ theme.id }}">{{ theme.title }}</option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
-            </details>
-
-            <div id="episode-list-container" class="episode-list full-width" hidden>
-                <label>Browse Past Episodes</label>
-                <div class="episode-list-panel" role="region" aria-label="Browse Past Episodes">
-                    <ul id="episode_list" class="episode-list-items"></ul>
+                
+                <div class="full-width">
+                    <label for="datasource">Source</label>
+                    <div class="select-wrapper">
+                        <select id="datasource" name="datasource" onchange="changeSourceDataset()">
+                            {% for source in config.data_sources %}
+                            <option value="{{ source.id }}">{{ source.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-            </div>
 
-            <button id="generate-btn" type="submit" class="generate-btn">Generate Episode</button>
+                <div>
+                    <label for="section">Section</label>
+                    <div class="select-wrapper">
+                        <select id="section" name="section">
+                            {% for num in config.sections %}
+                            <option value="{{ num }}">{{ num }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
 
-        </form>
+                <div>
+                    <label for="level">Reading Level</label>
+                    <div class="select-wrapper">
+                        <select id="level" name="level">
+                            {% for letter in config.levels %}
+                            <option value="{{ letter }}" {% if letter == "P" %}selected{% endif %}>{{ letter }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <details class="advanced-toggle">
+                    <summary>Advanced</summary>
+                    <div class="advanced-content">
+                        <div class="advanced-fieldset">
+                            <label for="header_text">Header Text</label>
+                            <input id="header_text" name="header_text" type="text" placeholder="{theme_name} - Section {section}">
+
+                            <label for="footer_text">Footer Text</label>
+                            <input id="footer_text" name="footer_text" type="text" placeholder="Page {current_page} of {total_pages}">
+
+                            <label for="answer_key_footer">Answer Key Footer</label>
+                            <input id="answer_key_footer" name="answer_key_footer" type="text" placeholder="Fountas & Pinnell Level {reading_level}">
+                            
+                            <details class="advanced-legend">
+                                <summary>Label Variables</summary>
+                                <div class="legend-body" aria-label="Text field variable legend">
+                                    <div class="legend-note">Use any of these variables within the above labels:</div>
+                                    <div><span class="legend-key">{source}</span>: Full data-source title</div>
+                                    <div><span class="legend-key">{source_abbr}</span>: Abbreviated data-source title</div>
+                                    <div><span class="legend-key">{theme}</span>: Full theme title</div>
+                                    <div><span class="legend-key">{theme_abbr}</span>: Abbreviated theme title</div>
+                                    <div><span class="legend-key">{section}</span>: Section # within the data source</div>
+                                    <div><span class="legend-key">{episode}</span>: Episode #</div>
+                                    <div><span class="legend-key">{reading_level}</span>: F&amp;P reading level</div>
+                                    <div><span class="legend-key">{worksheet_id}</span>: Unique worksheet identifier</div>
+                                    <div><span class="legend-key">{current_page}</span>: Page number within worksheet</div>
+                                    <div><span class="legend-key">{total_pages}</span>: Total worksheet pages</div>
+                                    <div><span class="legend-key">{model}</span>: Model identifier</div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <label for="model">Model</label>
+                        <div class="select-wrapper">
+                            <select id="model" name="model">
+                                {% for model in config.models %}
+                                <option value="{{ model.id }}" {% if model.is_default %}selected{% endif %}>{{ model.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </details>
+
+                <div id="episode-list-container" class="episode-list full-width" hidden>
+                    <label>Browse Past Episodes</label>
+                    <div class="episode-list-panel" role="region" aria-label="Browse Past Episodes">
+                        <ul id="episode_list" class="episode-list-items"></ul>
+                    </div>
+                </div>
+
+                <button id="generate-btn" type="submit" class="generate-btn">Generate Episode</button>
+
+            </form>
+        </div>
+
+        <div id="episode-pdf-preview" class="preview-panel" hidden>
+            <iframe id="episode-pdf-frame" title="Episode PDF Preview"></iframe>
+        </div>
     </div>
 
     <div class="footer">
@@ -404,6 +439,43 @@
         button.textContent = hasEpisodes ? 'Generate New Episode' : 'Generate Episode';
     }
 
+    function hidePdfPreview() {
+        const preview = document.getElementById('episode-pdf-preview');
+        const frame = document.getElementById('episode-pdf-frame');
+        if (frame) {
+            frame.src = '';
+        }
+        if (preview) {
+            preview.hidden = true;
+        }
+        const container = document.querySelector('.container');
+        if (container) {
+            container.classList.remove('has-preview');
+        }
+        if (currentPdfUrl) {
+            URL.revokeObjectURL(currentPdfUrl);
+            currentPdfUrl = null;
+        }
+        currentFitMode = null;
+    }
+
+    let currentPdfUrl = null;
+    let currentFitMode = null;
+
+    function updatePdfPreview() {
+        const preview = document.getElementById('episode-pdf-preview');
+        const frame = document.getElementById('episode-pdf-frame');
+        if (!preview || !frame || preview.hidden || !currentPdfUrl) {
+            return;
+        }
+        const frameBox = frame.getBoundingClientRect();
+        const fitMode = frameBox.width >= frameBox.height ? 'FitH' : 'FitV';
+        if (fitMode !== currentFitMode) {
+            frame.src = `${currentPdfUrl}#view=${fitMode}`;
+            currentFitMode = fitMode;
+        }
+    }
+
     async function handleEpisodeTap(item) {
         if (!item) {
             return;
@@ -440,8 +512,18 @@
             }
             const pdfBuffer = await response.arrayBuffer();
             const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-            window.open(pdfUrl, '_blank', 'noopener');
+            currentPdfUrl = URL.createObjectURL(pdfBlob);
+            currentFitMode = null;
+            const preview = document.getElementById('episode-pdf-preview');
+            const frame = document.getElementById('episode-pdf-frame');
+            if (preview && frame) {
+                preview.hidden = false;
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.classList.add('has-preview');
+                }
+                updatePdfPreview();
+            }
         } catch (err) {
             // Fetch failures should not affect UX.
         }
@@ -478,6 +560,7 @@
                 container.hidden = true;
                 list.innerHTML = '';
                 updateGenerateButton(false);
+                hidePdfPreview();
                 return;
             }
             container.hidden = false;
@@ -510,6 +593,7 @@
             container.hidden = true;
             list.innerHTML = '';
             updateGenerateButton(false);
+            hidePdfPreview();
         }
     }
 
@@ -597,6 +681,10 @@
                 }
             });
         }
+
+        window.addEventListener('resize', () => {
+            updatePdfPreview();
+        });
     });
 </script>
 
