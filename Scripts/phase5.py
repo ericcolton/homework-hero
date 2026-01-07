@@ -327,7 +327,8 @@ def build_presentation_str(template, page, total_pages):
     """Interpolate page/total_pages into the template string."""
     if not template:
         return ""
-    return template.replace("{current_page}", str(page)).replace("{total_pages}", str(total_pages))
+    formatted = template.replace("{current_page}", str(page)).replace("{total_pages}", str(total_pages))
+    return formatted
 
 def build_section(c, header_format, seed, section, footer_format, answer_key_footer_format, qr_code):
     

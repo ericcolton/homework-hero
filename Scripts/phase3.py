@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+from Libraries.datasets import load_dataset
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -44,17 +45,6 @@ def load_request(stdin_data: str):
         return json.loads(stdin_data)
     except json.JSONDecodeError as exc:
         raise SystemExit(f"Failed to parse JSON from stdin: {exc}")
-
-
-def load_dataset(source_dir: str, source_dataset: str):
-    path = Path(source_dir) / f"{source_dataset}.json"
-    if not path.is_file():
-        raise SystemExit(f"Dataset file not found: {path}")
-    try:
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
-    except json.JSONDecodeError as exc:
-        raise SystemExit(f"Failed to parse dataset JSON at {path}: {exc}")
 
 
 def find_section(dataset: dict, section_number: int) -> dict:
@@ -167,7 +157,7 @@ def main():
     #         raise SystemExit(f"Missing required key in request: {key}")
 
     source_dataset = request["source_dataset"]
-    dataset = load_dataset(args.source_datasets, source_dataset)
+    dataset = load_dataset(source_dataset, source_dir=args.source_datasets)
 
     # Determine section number from request (section)
     section_number = request.get("section")
@@ -183,4 +173,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
