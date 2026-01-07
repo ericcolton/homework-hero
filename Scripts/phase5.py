@@ -165,7 +165,9 @@ def measure_block_height(wrapped_list, start_idx, end_idx):
     total_min_height = num_lines * LINE_HEIGHT + num_items * BASE_GAP_BETWEEN_PROBLEMS
     return total_min_height
 
-def draw_header_page(c, header, subtitle, page, total_pages):
+def draw_header_page(c, header_format, subtitle, page, total_pages):
+
+    header = build_presentation_str(header_format, 1, 2)
     """Draws the centered header + subtitle; returns next y."""
     y = PAGE_H - M_TOP
     c.setFont(TITLE_FONT, TITLE_SIZE)
@@ -272,38 +274,25 @@ def draw_questions(c, wrapped_questions, start_idx, end_idx, y_start, start_num=
         y -= BASE_GAP_BETWEEN_PROBLEMS
     return y, qnum
 
-def draw_questions_footer(c, footer_format, presentation_metadata):
-    """Draw a footer at the bottom of the page based on footer_metadata."""
-    if not footer_format:
+def draw_questions_footer(c, footer_text):
+    """Draw a footer at the bottom of the page based on footer_text."""
+    if not footer_text:
         return
     
     c.setFont(TEXT_FONT, TEXT_SIZE - 2)
-    footer_text = footer_format
-    for key, value in presentation_metadata.items():
-        if key == "qr_code":
-            continue
-        placeholder = "{" + key + "}"
-        footer_text = footer_text.replace(placeholder, str(value))
 
     # center the footer text on the page
     center_x = (PAGE_W - stringWidth(footer_text, TEXT_FONT, TEXT_SIZE - 2)) / 2
     c.drawString(center_x, M_BOTTOM / 2, footer_text)
 
-def draw_answers_footer(c, footer_format, presentation_metadata):
-    """Draw a footer at the bottom of the page based on footer_metadata."""
-    if not footer_format:
+def draw_answers_footer(c, footer_text, seed, qr_code):
+    """Draw a footer at the bottom of the page based on footer_text."""
+    if not footer_text:
         return
     
     c.setFont(TEXT_FONT, TEXT_SIZE - 2)
-    footer_text = footer_format
-    for key, value in presentation_metadata.items():
-        if key == "qr_code":
-            continue
-        placeholder = "{" + key + "}"
-        footer_text = footer_text.replace(placeholder, str(value))
 
-    if presentation_metadata.get("qr_code"):
-        qr = presentation_metadata["qr_code"]
+    if qr_code:
         try:
             b = qr.getBounds()
             qr_w = (b[2] - b[0]) if b else 40
@@ -321,7 +310,6 @@ def draw_answers_footer(c, footer_format, presentation_metadata):
             pass
 
         # draw "Get Episode X" text centered below the QR
-        seed = int(presentation_metadata.get("seed"))
         next_seed = str(seed + 1)
         if seed is not None:
             episode_text = f"Get Episode {next_seed}"
@@ -335,23 +323,18 @@ def draw_answers_footer(c, footer_format, presentation_metadata):
     center_x = (PAGE_W - stringWidth(footer_text, TEXT_FONT, TEXT_SIZE - 2)) / 2
     c.drawString(center_x, M_BOTTOM / 2, footer_text)
 
-def build_section(c, section_title, seed, section, footer_format, answer_key_footer_format, presentation_variables):
+def build_presentation_str(template, page, total_pages):
+    """Interpolate page/total_pages into the template string."""
+    if not template:
+        return ""
+    return template.replace("{current_page}", str(page)).replace("{total_pages}", str(total_pages))
+
+def build_section(c, header_format, seed, section, footer_format, answer_key_footer_format, qr_code):
     
     output_subtitle = section["output"]["subtitle"]
     entries = section["data"]
 
     subtitle_with_episode = f"Episode {seed}: " + output_subtitle
-    
-    # if not isinstance(entries, list) or not entries:
-    #     print("Error: JSON must be a non-empty list of entries.", file=sys.stderr)
-    #     sys.exit(1)
-
-    # # Basic schema check
-    # required = {"word", "definition", "part_of_speech", "sentence"}
-    # for i, e in enumerate(entries):
-    #     if not isinstance(e, dict) or not required.issubset(e.keys()):
-    #         print(f"Error: entry {i} missing required keys {required}.", file=sys.stderr)
-    #         sys.exit(1)
     
     rng = random.Random(seed)
     shuffled_entries = rng.sample(entries, k=len(entries)) 
@@ -374,7 +357,7 @@ def build_section(c, section_title, seed, section, footer_format, answer_key_foo
     wrapped = [wrap_text(q["sentence"], TEXT_FONT, TEXT_SIZE, CONTENT_W) for q in questions]
 
     # ---------------- Page 1 ----------------
-    y = draw_header_page(c, section_title, subtitle_with_episode, 1, 2)
+    y = draw_header_page(c, header_format, subtitle_with_episode, 1, 2)
     y = draw_word_bank(c, word_counts, y)
     available_h = y - M_BOTTOM
 
@@ -388,24 +371,22 @@ def build_section(c, section_title, seed, section, footer_format, answer_key_foo
             break
 
     _, next_num = draw_questions(c, wrapped, 0, end_idx_p1, y, start_num=1)
-    presentation_variables["current_page"] = 1
-    draw_questions_footer(c, footer_format, presentation_variables)
+    draw_questions_footer(c, build_presentation_str(footer_format, 1, 2))
     c.showPage()
 
     # ---------------- Page 2 (questions continued) ----------------
-    y2 = draw_header_page(c, section_title, subtitle_with_episode, 2, 2)
+    y2 = draw_header_page(c, header_format, subtitle_with_episode, 2, 2)
     y2 -= EXTRA_SPACE_BEFORE_FIRST_Q
     available_h2 = y2 - M_BOTTOM
 
     _, next_num = draw_questions(c, wrapped, end_idx_p1, len(wrapped), y2, start_num=next_num)
-    presentation_variables["current_page"] = 2
-    draw_questions_footer(c, footer_format, presentation_variables)
+    draw_questions_footer(c, build_presentation_str(footer_format, 2, 2))
     c.showPage()
 
     # ---------------- Page 3 (ANSWER KEY) ----------------
     y3 = PAGE_H - M_TOP
     c.setFont(TITLE_FONT, TITLE_SIZE)
-    ak_header = f"{section_title} (Answer Key)"
+    ak_header = build_presentation_str(f"{header_format} (Answer Key)", 3, 2)
     c.drawString((PAGE_W - stringWidth(ak_header, TITLE_FONT, TITLE_SIZE)) / 2, y3, ak_header)
     y3 -= (TITLE_SIZE + 6)
 
@@ -451,33 +432,14 @@ def build_section(c, section_title, seed, section, footer_format, answer_key_foo
 
         y3 -= (TEXT_SIZE + 6)
     
-    draw_answers_footer(c, answer_key_footer_format, presentation_variables)
+    draw_answers_footer(c, build_presentation_str(answer_key_footer_format, 3, 2), seed, qr_code)
     c.showPage()
 
-    
-def build_section_title(header_format, presentation_variables):
-    header_text = header_format
-    for key, value in presentation_variables.items():
-        placeholder = "{" + key + "}"
-        header_text = header_text.replace(placeholder, str(value))
-    return header_text
     
 def build_pdf(doc_root, output_stream):
     c = canvas.Canvas(output_stream, pagesize=letter)
         
     worksheet_id = doc_root.get('worksheet_id')
-    
-    
-    presentation_variables = {
-        # "section": doc_root["presentation_metadata"]["section"],
-        "section": doc_root["section"],
-        "reading_system": doc_root["reading_level"]["system"],
-        "reading_level": doc_root["reading_level"]["level"],
-        "model": doc_root["model"],
-        "seed": doc_root["seed"],
-        "worksheet_id": worksheet_id,
-        "total_pages": 2,
-    }
 
     # Generate QR code image for http://cindysoftware.com/ws={worksheet_id}
     try:
@@ -490,17 +452,16 @@ def build_pdf(doc_root, output_stream):
         d.add(qr_widget)
         #png_bytes = renderPM.drawToString(d, fmt="PNG")
         #presentation_variables["qr_code"] = ImageReader(io.BytesIO(png_bytes))
-        presentation_variables["qr_code"] = d
+        qr_code = d
     except Exception:
-        presentation_variables["qr_code"] = None
+        qr_code = None
 
     header_format = doc_root["presentation_metadata"]["header"]
     seed = doc_root["seed"]
 
-    title = build_section_title(header_format, presentation_variables)
-    footer_format = str(doc_root["presentation_metadata"]["footer"])
-    answer_key_footer_format = str(doc_root["presentation_metadata"]["answer_key_footer"])
-    build_section(c, title, seed, doc_root, footer_format, answer_key_footer_format, presentation_variables)
+    footer_format = doc_root["presentation_metadata"]["footer"]
+    answer_key_footer_format = doc_root["presentation_metadata"]["answer_key_footer"]
+    build_section(c, header_format, seed, doc_root, footer_format, answer_key_footer_format, qr_code)
 
     c.save()
     

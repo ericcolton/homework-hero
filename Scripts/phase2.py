@@ -253,6 +253,7 @@ def process_request(request, responses_datastore, scripts_dir, config_path):
         raise Phase2Error(f"Missing required field in request JSON: {e}") from e
 
     reading_level_segment = build_reading_level_segment(reading_level)
+    worksheet_id = build_worksheet_id(request, config_path)
 
     datastore_root = Path(responses_datastore)
 
@@ -275,7 +276,6 @@ def process_request(request, responses_datastore, scripts_dir, config_path):
         phase_3_input.pop("presentation_metadata", None)
 
         # Build and add worksheet_id
-        worksheet_id = build_worksheet_id(request, config_path)
         phase_3_input["worksheet_id"] = worksheet_id
 
         phase3_path = Path(scripts_dir) / "phase3.py"
@@ -325,8 +325,28 @@ def process_request(request, responses_datastore, scripts_dir, config_path):
     # Add the presentation_metadata from the original request if present
     request_metadata = request.get("presentation_metadata")
     if request_metadata:
-        request_metadata["section"] = section
-        output_payload["presentation_metadata"] = request_metadata
+        presentation_variables = {
+            "section": section,
+            "reading_system": reading_level["system"],
+            "reading_level": reading_level["level"],
+            "model": model,
+            "seed": seed,
+            "worksheet_id": worksheet_id,
+        }
+
+        interpolated_metadata = dict(request_metadata)
+        for key in ("header", "footer", "answer_key_footer"):
+            if key in interpolated_metadata:
+                template = interpolated_metadata[key]
+                if template is None:
+                    continue
+                text = str(template)
+                for var_key, value in presentation_variables.items():
+                    placeholder = "{" + var_key + "}"
+                    text = text.replace(placeholder, str(value))
+                interpolated_metadata[key] = text
+
+        output_payload["presentation_metadata"] = interpolated_metadata
 
     return output_payload
 
