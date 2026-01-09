@@ -118,10 +118,76 @@ def index():
 
 @app.route('/generate', methods=['POST'])
 def generate():
-    # Placeholder for your generation logic
-    data = request.form
-    print(f"Generating with: {data}")
-    return jsonify({"status": "success", "message": "Worksheet generation started..."})
+    raw_payload = request.get_json(silent=True)
+    if raw_payload is None:
+        raw_payload = request.form.to_dict()
+
+    source_dataset = raw_payload.get("source_dataset") or raw_payload.get("datasource")
+    theme = raw_payload.get("theme")
+    reading_level = raw_payload.get("reading_level") or raw_payload.get("level")
+    if isinstance(reading_level, dict):
+        reading_level = reading_level.get("level")
+    model = raw_payload.get("model")
+    section = raw_payload.get("section")
+
+    if not all([source_dataset, theme, reading_level, model, section]):
+        return jsonify({"error": "Missing required fields."}), 400
+
+    try:
+        episodes_list = list_cached_episodes(
+            source_dataset=source_dataset,
+            theme=theme,
+            reading_level=reading_level,
+            model=model,
+            section=section,
+        )
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    next_episode = episodes_list[-1]["episode"] + 1 if episodes_list else 1
+
+    presentation_metadata = dict(raw_payload.get("presentation_metadata") or {})
+    header_value = raw_payload.get("header")
+    if header_value is None:
+        header_value = raw_payload.get("header_text")
+    footer_value = raw_payload.get("footer")
+    if footer_value is None:
+        footer_value = raw_payload.get("footer_text")
+    answer_key_footer_value = raw_payload.get("answer_key_footer")
+
+    if header_value is not None:
+        presentation_metadata["header"] = header_value
+    if footer_value is not None:
+        presentation_metadata["footer"] = footer_value
+    if answer_key_footer_value is not None:
+        presentation_metadata["answer_key_footer"] = answer_key_footer_value
+
+    payload = {
+        "source_dataset": source_dataset,
+        "theme": theme,
+        "reading_level": {"system": "fp", "level": reading_level},
+        "model": model,
+        "section": section,
+        "episode": next_episode,
+        "seed": next_episode,
+    }
+    if presentation_metadata:
+        payload["presentation_metadata"] = presentation_metadata
+
+    try:
+        response_json = run_with_json(json.dumps(payload, ensure_ascii=False))
+        response_payload = json.loads(response_json)
+    except Phase2Error as exc:
+        return jsonify({"error": str(exc)}), 400
+    except json.JSONDecodeError as exc:
+        return jsonify({"error": f"Failed to parse phase2 response: {exc}"}), 500
+
+    try:
+        pdf_bytes = run_phase5_with_json(response_json)
+    except ValueError as exc:
+        return jsonify({"error": f"Failed to build PDF: {exc}"}), 500
+
+    return pdf_bytes
 
 @app.route('/sections/<source_dataset>')
 def sections(source_dataset):
