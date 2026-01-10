@@ -81,6 +81,13 @@ def read_stdin_json() -> Dict[str, Any]:
         return json.loads(raw)
     except json.JSONDecodeError as exc:
         raise SystemExit(f"Failed to parse JSON from stdin: {exc}") from exc
+
+
+def read_request_json(request_json: str) -> Dict[str, Any]:
+    try:
+        return json.loads(request_json)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Failed to parse JSON from request_json: {exc}") from exc
     
 def build_reading_level_str(request_json: Dict[str, Any]) -> str:
     reading_level = request_json.get("reading_level")
@@ -284,6 +291,56 @@ def main() -> None:
 
     json.dump(output_obj, sys.stdout, ensure_ascii=False, indent=2)
     sys.stdout.write("\n")
+
+
+def run_from_json(
+    request_json: str,
+    prompt_path: Optional[str] = None,
+    themes_dir: Optional[str] = None,
+) -> str:
+    defaults = load_default_paths()
+    prompt_path = prompt_path or defaults["prompt_path"]
+    if prompt_path is None:
+        raise SystemExit("prompt_path is required.")
+    if themes_dir is None:
+        themes_dir = defaults["themes_dir"]
+
+    request_obj = read_request_json(request_json)
+    raw_system_prompt = read_file_text(prompt_path)
+    system_prompt = flesh_out_system_prompt(raw_system_prompt, request_obj)
+    theme_content = load_theme_content(request_obj, themes_dir)
+    model_input = build_model_input(request_obj, theme_content)
+    response_payload = call_openai(
+        request=request_obj,
+        system_prompt=system_prompt,
+        user_input=model_input,
+    )
+    output_obj = append_response_json(request_obj, response_payload)
+    return json.dumps(output_obj, ensure_ascii=False, indent=2)
+
+
+def run_with_json(
+    request_json: str,
+    prompt_path: Optional[str] = None,
+    themes_dir: Optional[str] = None,
+) -> str:
+    return run_from_json(
+        request_json,
+        prompt_path=prompt_path,
+        themes_dir=themes_dir,
+    )
+
+
+def run_phase4_with_json(
+    request_json: str,
+    prompt_path: Optional[str] = None,
+    themes_dir: Optional[str] = None,
+) -> str:
+    return run_from_json(
+        request_json,
+        prompt_path=prompt_path,
+        themes_dir=themes_dir,
+    )
 
 
 if __name__ == "__main__":

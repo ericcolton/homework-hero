@@ -7,6 +7,7 @@ import hashlib
 from pathlib import Path
 
 from phase3 import run_with_json as run_phase3_with_json
+from phase4 import run_phase4_with_json
 
 from Libraries.reference_data import lookup_source_dataset, lookup_theme
 
@@ -291,22 +292,10 @@ def process_request(request, responses_datastore, scripts_dir, config_path):
             )
         except SystemExit as e:
             raise Phase2Error(str(e)) from e
-        # Execute phase4.py with stdout_data from phase3
-        phase4_path = Path(scripts_dir) / "phase4.py"
-        process = subprocess.run(
-            ["python3", str(phase4_path)],
-            input=phase_3_stdout_data,
-            text=True,
-            capture_output=True
-        )
-        phase_4_return_code = process.returncode
-        phase_4_stdout_data = process.stdout
-        phase_4_stderr = process.stderr
-        if phase_4_return_code != 0:
-            raise Phase2Error(
-                f"phase4.py failed with return code {phase_4_return_code}\n{phase_4_stderr}",
-                exit_code=phase_4_return_code,
-            )
+        try:
+            phase_4_stdout_data = run_phase4_with_json(phase_3_stdout_data)
+        except SystemExit as e:
+            raise Phase2Error(str(e)) from e
         
         # Write phase_4_stdout_data to cache_path, creating subdirectories as needed
         cache_path.parent.mkdir(parents=True, exist_ok=True)
